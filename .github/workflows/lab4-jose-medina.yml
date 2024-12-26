@@ -24,12 +24,12 @@ jobs:
           REPO_NAME: ${{ github.event.repository.name }}
         run: |
           echo "Verificando si el proyecto $REPO_NAME existe en SonarCloud..."
-          response=$(curl -s -o /dev/null -w "%{http_code}" -u "$DSO_TK_SONARCLOUD_LAB4:" \
+          response=$(curl -s -o /dev/null -w "%{http_code}" -u "$DSO_TK_SONARCLOUD:" \
             "https://sonarcloud.io/api/projects/search?projects=$REPO_NAME")
 
           if [ "$response" -ne 200 ]; then
             echo "El proyecto no existe. Creándolo en SonarCloud..."
-            create_response=$(curl -s -w "%{http_code}" -o /dev/null -X POST -u "$DSO_TK_SONARCLOUD_LAB4:" \
+            create_response=$(curl -s -w "%{http_code}" -o /dev/null -X POST -u "$DSO_TK_SONARCLOUD:" \
               "https://sonarcloud.io/api/projects/create" \
               -d "name=$REPO_NAME" \
               -d "project=$REPO_NAME" \
@@ -41,7 +41,7 @@ jobs:
             fi
 
             echo "Estableciendo la rama [$BRANCH_NAME] como predeterminada..."
-            curl -s -f -X POST -u "$DSO_TK_SONARCLOUD_LAB4:" \
+            curl -s -f -X POST -u "$DSO_TK_SONARCLOUD:" \
               "https://sonarcloud.io/api/project_branches/rename" \
               -d "name=$BRANCH_NAME" \
               -d "project=$REPO_NAME"
