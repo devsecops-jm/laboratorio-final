@@ -15,7 +15,7 @@ jobs:
       - name: Validate or Create SonarCloud Project
         id: validate-project
         env:
-          DSO_TK_SONARCLOUD: ${{ secrets.DSO_TK_SONAR}}
+          DSO_TK_SONARCLOUD: ${{ secrets.DSO_TK_SONARCLOUD_LAB4}}
           REPO_NAME: ${{ github.event.repository.name }}
         run: |
           echo "En construcción"
@@ -27,7 +27,7 @@ jobs:
       - name: Perform Branch Analysis
         if: env.project_created == 'false'
         env:
-          DSO_TK_SONARCLOUD: ${{ secrets.DSO_TK_SONAR}}
+          DSO_TK_SONARCLOUD: ${{ secrets.DSO_TK_SONARCLOUD_LAB4}}
           REPO_NAME: ${{ github.event.repository.name }}
           BRANCH_NAME: ${{ github.ref_name }}
         run: |
