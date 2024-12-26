@@ -1,0 +1,97 @@
+name: DevSecOps-jm-sysadm
+
+on:
+  push:
+    branches:
+      - feature-jm-sysadm
+      #- '**'
+jobs:
+  SAST:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Validate or Create SonarCloud Project
+        id: validate-project
+        env:
+          DSO_TK_SONARCLOUD: ${{ secrets.DSO_TK_SONAR}}
+          REPO_NAME: ${{ github.event.repository.name }}
+        run: |
+          echo "En construcción"
+
+      - name: Perform Initial Analysis (if Project Created)
+        run: |
+          echo "En construcción"
+
+      - name: Perform Branch Analysis
+        if: env.project_created == 'false'
+        env:
+          DSO_TK_SONARCLOUD: ${{ secrets.DSO_TK_SONAR}}
+          REPO_NAME: ${{ github.event.repository.name }}
+          BRANCH_NAME: ${{ github.ref_name }}
+        run: |
+          echo "En construcción"
+
+  SCA:
+    needs: SAST
+    runs-on: ubuntu-24.04
+    steps:
+    
+    - name: Checkout code
+      uses: actions/checkout@v2
+    
+    - name: Build
+      run: |
+          echo "En construcción"
+
+    - name: Dependency Check
+      run: |
+          echo "En construcción"
+        
+    - name: Upload Test Result
+      run: |
+          echo "En construcción"
+
+  
+  DockerBuild:
+    needs: SCA
+    runs-on: ubuntu-24.04
+    steps:
+    
+    - name: Checkout code
+      uses: actions/checkout@v2
+      
+    - name: Docker Login
+      run: |
+          echo "En construcción"
+    
+    - name: Deploy Project
+      run: |
+          echo "En construcción"
+
+    - name: Docker Build
+      run: |
+          echo "En construcción"
+
+    - name: Push Docker
+      run: |
+          echo "En construcción"
+  DockerScan:
+    needs: DockerBuild
+    runs-on: ubuntu-24.04
+    steps:
+    
+    - name: Docker Login
+      run: |
+          echo "En construcción"
+    
+    - name: Pull Docker
+      run: |
+          echo "En construcción"
+
+    - name: Run Trivy Scan
+      run: |
+          echo "En construcción"
+
+    
