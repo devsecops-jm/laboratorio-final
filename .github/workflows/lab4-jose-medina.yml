@@ -83,6 +83,11 @@ jobs:
           qualityGateStatus=$(curl -s -u "$DSO_TK_SONARCLOUD:" \
             "https://sonarcloud.io/api/qualitygates/project_status?analysisId=$analysisId" | jq -r '.projectStatus.status')
 
+          if [ "$qualityGateStatus" == "NONE" ]; then
+            echo "El proyecto no cumple con el Quality Gate, status: $qualityGateStatus es parte de la capa gratuita"
+            exit 1
+          fi
+            echo "El proyecto no cumple con el Quality Gate: $qualityGateStatus."
           if [ "$qualityGateStatus" != "OK" ]; then
             echo "El proyecto no cumple con el Quality Gate: $qualityGateStatus."
             echo "Verificando vulnerabilidades críticas..."
