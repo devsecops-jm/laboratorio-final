@@ -49,6 +49,7 @@ jobs:
         with:
             args:
               -Dsonar.projectKey=$REPO_NAME \
+              -Dsonar.organization=$ORG_NAME \
               -Dsonar.host.url=https://sonarcloud.io \
               -Dsonar.token=$DSO_TK_SONARCLOUD \
               -Dsonar.branch.name=$BRANCH_NAME
@@ -64,7 +65,6 @@ jobs:
         with:
             args:
               -Dsonar.projectKey=$REPO_NAME \
-              -Dsonar.organization=$ORG_NAME \
               -Dsonar.host.url=https://sonarcloud.io \
               -Dsonar.token=$DSO_TK_SONARCLOUD \
               -Dsonar.branch.name=$BRANCH_NAME
