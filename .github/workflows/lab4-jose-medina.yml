@@ -33,7 +33,7 @@ jobs:
           else
             echo "Proyecto ${{ github.event.repository.name }} creado exitosamente en Sonarcloud"
             
-            echo "Se establece rama main como rama por defecto"
+            echo "Se establece rama $BRANCH_NAME como rama por defecto"
             curl -X POST -u '${{ secrets.SONAR_TOKEN }}:' 'https://sonarcloud.io/api/project_branches/rename' -d 'name=$BRANCH_NAME' -d 'project=${{ github.event.repository.name }}'
             echo "project_created=true" >> $GITHUB_ENV
           fi
