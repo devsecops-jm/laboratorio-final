@@ -38,19 +38,20 @@ jobs:
             echo "project_created=true" >> $GITHUB_ENV
           fi
           set -e
-          
+
       - name: Perform Initial Analysis (if Project Created)
         if: env.project_created == 'true'
         uses: SonarSource/sonarqube-scan-action@v4
         env:
           DSO_TK_SONARCLOUD: ${{ secrets.SONAR_TOKEN }}
           REPO_NAME: ${{ github.event.repository.name }}
+          BRANCH_NAME: ${{ github.ref_name }}
         with:
             args:
               -Dsonar.projectKey=$REPO_NAME \
               -Dsonar.organization=$ORG_NAME \
               -Dsonar.host.url=https://sonarcloud.io \
-              -Dsonar.token=$DSO_TK_SONARCLOUD\
+              -Dsonar.token=$DSO_TK_SONARCLOUD \
               -Dsonar.branch.name=$BRANCH_NAME
             projectBaseDir: .
 
@@ -66,7 +67,7 @@ jobs:
               -Dsonar.projectKey=$REPO_NAME \
               -Dsonar.organization=$ORG_NAME \
               -Dsonar.host.url=https://sonarcloud.io \
-              -Dsonar.token=$DSO_TK_SONARCLOUD\
+              -Dsonar.token=$DSO_TK_SONARCLOUD \
               -Dsonar.branch.name=$BRANCH_NAME
             projectBaseDir: .
 
