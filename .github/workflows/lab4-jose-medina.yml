@@ -3,16 +3,19 @@ name: DevSecOps-jm-sysadm
 on:
   push:
     branches:
-      - feature-jm-sysadm
+      - main
       #- '**'
 jobs:
   SAST:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Set Environment Variables
+
+      - name: SATS - Set Environment Variables
         run: |
           echo "BRANCH_NAME=${{ github.ref_name }}" >> $GITHUB_ENV
           echo "ORG_NAME=devsecops-jm" >> $GITHUB_ENV
@@ -20,7 +23,7 @@ jobs:
       - name: Validate or Create SonarCloud Project
         id: validate-project
         env:
-          DSO_TK_SONARCLOUD: ${{ secrets.DSO_TK_SONARCLOUD_LAB4}}
+          DSO_TK_SONARCLOUD: ${{ secrets.SONAR_TOKEN}}
           REPO_NAME: ${{ github.event.repository.name }}
         run: |
           echo "Verificando si el proyecto $REPO_NAME existe en SonarCloud..."
@@ -53,8 +56,18 @@ jobs:
           fi
 
       - name: Perform Initial Analysis (if Project Created)
+        if: env.project_created == 'true'
+        env:
+          DSO_TK_SONARCLOUD: ${{ secrets.SONAR_TOKEN }}
+          REPO_NAME: ${{ github.event.repository.name }}
         run: |
-          echo "En construcción"
+          echo "Configuración análisis inicial en la rama: $BRANCH_NAME ..."
+          ./gradlew sonarqube \
+            -Dsonar.projectKey=$REPO_NAME \
+            -Dsonar.organization=$ORG_NAME \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.token=$DSO_TK_SONARCLOUD\
+            -Dsonar.branch.name=$BRANCH_NAME
 
       - name: Perform Branch Analysis
         if: env.project_created == 'false'
