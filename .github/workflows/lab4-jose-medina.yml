@@ -3,7 +3,7 @@ name: DevSecOps-jm-sysadm
 on:
   push:
     branches:
-      - main
+      - feature-jm-sysadm #main
       #- '**'
 jobs:
   SAST:
@@ -20,63 +20,55 @@ jobs:
           echo "BRANCH_NAME=${{ github.ref_name }}" >> $GITHUB_ENV
           echo "ORG_NAME=devsecops-jm" >> $GITHUB_ENV
 
-      - name: Validate or Create SonarCloud Project
-        id: validate-project
-        env:
-          DSO_TK_SONARCLOUD: ${{ secrets.SONAR_TOKEN}}
-          REPO_NAME: ${{ github.event.repository.name }}
+      - name: Validando proyecto en SonarCloud
+        id: validateProjectOnSonar
         run: |
-          echo "Verificando si el proyecto $REPO_NAME existe en SonarCloud..."
-          response=$(curl -s -o /dev/null -w "%{http_code}" -u "$DSO_TK_SONARCLOUD:" \
-            "https://sonarcloud.io/api/projects/search?projects=$REPO_NAME")
-
-          if [ "$response" -ne 200 ]; then
-            echo "El proyecto no existe. Creándolo en SonarCloud..."
-            create_response=$(curl -s -w "%{http_code}" -o /dev/null -X POST -u "$DSO_TK_SONARCLOUD:" \
-              "https://sonarcloud.io/api/projects/create" \
-              -d "name=$REPO_NAME" \
-              -d "project=$REPO_NAME" \
-              -d "organization=$ORG_NAME" \
-              -d "visibility=public")
-
-            if [ "$create_response" -ne 201 ]; then
-              echo "Proyecto creado exitosamente (HTTP $create_response)."
-            fi
-
-            echo "Estableciendo la rama [$BRANCH_NAME] como predeterminada..."
-            curl -s -f -X POST -u "$DSO_TK_SONARCLOUD:" \
-              "https://sonarcloud.io/api/project_branches/rename" \
-              -d "name=$BRANCH_NAME" \
-              -d "project=$REPO_NAME"
-
-            echo "project_created=true" >> $GITHUB_ENV
-          else
-            echo "El proyecto ya existe en SonarCloud."
+          #pwd
+          #ls -R
+          set +e
+          curl -f -X POST -u '${{ secrets.SONAR_TOKEN }}:' 'https://sonarcloud.io/api/projects/create' -d 'name=${{ github.event.repository.name }}' -d 'project=${{ github.event.repository.name }}' -d 'organization=$ORG_NAME' -d 'visibility=public'
+          if [ $? -ne 0 ]; then
+            echo "Proyecto ya existe en Sonarcloud"
             echo "project_created=false" >> $GITHUB_ENV
+          else
+            echo "Proyecto ${{ github.event.repository.name }} creado exitosamente en Sonarcloud"
+            
+            echo "Se establece rama main como rama por defecto"
+            curl -X POST -u '${{ secrets.SONAR_TOKEN }}:' 'https://sonarcloud.io/api/project_branches/rename' -d 'name=$BRANCH_NAME' -d 'project=${{ github.event.repository.name }}'
+            echo "project_created=true" >> $GITHUB_ENV
           fi
-
+          set -e
+          
       - name: Perform Initial Analysis (if Project Created)
         if: env.project_created == 'true'
+        uses: SonarSource/sonarqube-scan-action@v4
         env:
           DSO_TK_SONARCLOUD: ${{ secrets.SONAR_TOKEN }}
           REPO_NAME: ${{ github.event.repository.name }}
-        run: |
-          echo "Configuración análisis inicial en la rama: $BRANCH_NAME ..."
-          ./gradlew sonarqube \
-            -Dsonar.projectKey=$REPO_NAME \
-            -Dsonar.organization=$ORG_NAME \
-            -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.token=$DSO_TK_SONARCLOUD\
-            -Dsonar.branch.name=$BRANCH_NAME
+        with:
+            args:
+              -Dsonar.projectKey=$REPO_NAME \
+              -Dsonar.organization=$ORG_NAME \
+              -Dsonar.host.url=https://sonarcloud.io \
+              -Dsonar.token=$DSO_TK_SONARCLOUD\
+              -Dsonar.branch.name=$BRANCH_NAME
+            projectBaseDir: .
 
       - name: Perform Branch Analysis
         if: env.project_created == 'false'
+        uses: SonarSource/sonarqube-scan-action@v4
         env:
-          DSO_TK_SONARCLOUD: ${{ secrets.DSO_TK_SONARCLOUD_LAB4}}
+          DSO_TK_SONARCLOUD: ${{ secrets.SONAR_TOKEN}}
           REPO_NAME: ${{ github.event.repository.name }}
-          BRANCH_NAME: ${{ github.ref_name }}
-        run: |
-          echo "En construcción"
+          BRANCH_NAME: ${{ github.ref_name }}        
+        with:
+            args:
+              -Dsonar.projectKey=$REPO_NAME \
+              -Dsonar.organization=$ORG_NAME \
+              -Dsonar.host.url=https://sonarcloud.io \
+              -Dsonar.token=$DSO_TK_SONARCLOUD\
+              -Dsonar.branch.name=$BRANCH_NAME
+            projectBaseDir: .
 
   SCA:
     needs: SAST
