@@ -91,7 +91,7 @@ jobs:
 
             if [ "$vulnerabilities" -gt 0 ]; then
               echo "Se encontraron $vulnerabilities vulnerabilidades críticas. El proyecto no cumple con los estándares de seguridad."
-              #exit 1
+              exit 1
             fi
           fi
 
