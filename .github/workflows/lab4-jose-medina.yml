@@ -113,7 +113,7 @@ jobs:
           fetch-depth: 0
           
       - name: Build project with NPM
-        run: npm clean install
+        run: npm install
 
       - name: Depcheck
         uses: dependency-check/Dependency-Check_Action@main
