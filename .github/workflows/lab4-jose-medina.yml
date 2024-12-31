@@ -106,21 +106,46 @@ jobs:
     needs: SAST
     runs-on: ubuntu-24.04
     steps:
-    
-    - name: Checkout code
-      uses: actions/checkout@v2
-    
-    - name: Build
-      run: |
-          echo "En construcción"
 
-    - name: Dependency Check
-      run: |
-          echo "En construcción"
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Build project with Maven
+        run: mvn clean install
+      - name: Depcheck
+        uses: dependency-check/Dependency-Check_Action@main
+        id: Depcheck
+        with:
+          project: 'test'
+          path: '.'
+          format: 'HTML'
+          out: 'reports' # this is the default, no need to specify unless you wish to override it
+          args: >
+            --failOnCVSS 7
+            --enableRetired
+      - name: Upload Test results
+        uses: actions/upload-artifact@master
+        with:
+           name: Depcheck report
+           path: ${{github.workspace}}/reports
+      
+
+    # - name: Checkout code
+    #   uses: actions/checkout@v2
+    
+    # - name: Build
+    #   run: |
+    #       echo "En construcción"
+
+    # - name: Dependency Check
+    #   run: |
+    #       echo "En construcción"
         
-    - name: Upload Test Result
-      run: |
-          echo "En construcción"
+    # - name: Upload Test Result
+    #   run: |
+    #       echo "En construcción"
 
   
   DockerBuild:
