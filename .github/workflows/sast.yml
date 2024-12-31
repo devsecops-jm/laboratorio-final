@@ -3,8 +3,8 @@ on:
   push:
     branches:
       - none #feature-jm-sysadm
-  pull_request:
-    types: [opened, synchronize, reopened]
+  # pull_request:
+  #   types: [opened, synchronize, reopened]
 jobs:
   sonarqube:
     name: SonarQube
