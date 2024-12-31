@@ -21,8 +21,6 @@ jobs:
         with:
           sarif_file: snyk.sarif
 
-
-
 # name: SCA
 
 # on:
