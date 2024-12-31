@@ -21,7 +21,7 @@ name: Snyk Security
 on:
   push:
     branches:
-      - main # feature-jm-sysadm #main
+      - none # main # feature-jm-sysadm #main
 
 permissions:
   contents: read

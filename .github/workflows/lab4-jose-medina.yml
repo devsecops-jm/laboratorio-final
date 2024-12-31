@@ -6,6 +6,7 @@ on:
       - none #main # feature-jm-sysadm #main
       #- '**'
 jobs:
+
   SAST:
     runs-on: ubuntu-latest
     steps:
@@ -26,7 +27,9 @@ jobs:
           #pwd
           #ls -R
           set +e
-          curl -f -X POST -u '${{ secrets.SONAR_TOKEN }}:' 'https://sonarcloud.io/api/projects/create' -d 'name=${{ github.event.repository.name }}' -d 'project=${{ github.event.repository.name }}' -d 'organization=$ORG_NAME' -d 'visibility=public'
+          curl -f -X POST -u '${{ secrets.SONAR_TOKEN }}:' 'https://sonarcloud.io/api/projects/create' \
+          -d 'name=${{ github.event.repository.name }}' -d 'project=${{ github.event.repository.name }}' \
+          -d 'organization=$ORG_NAME' -d 'visibility=public'
           if [ $? -ne 0 ]; then
             echo "Proyecto ya existe en Sonarcloud"
             echo "project_created=false" >> $GITHUB_ENV
@@ -34,7 +37,8 @@ jobs:
             echo "Proyecto ${{ github.event.repository.name }} creado exitosamente en Sonarcloud"
             
             echo "Se establece rama $BRANCH_NAME como rama por defecto"
-            curl -X POST -u '${{ secrets.SONAR_TOKEN }}:' 'https://sonarcloud.io/api/project_branches/rename' -d 'name=$BRANCH_NAME' -d 'project=${{ github.event.repository.name }}'
+            curl -X POST -u '${{ secrets.SONAR_TOKEN }}:' 'https://sonarcloud.io/api/project_branches/rename' \
+            -d 'name=$BRANCH_NAME' -d 'project=${{ github.event.repository.name }}'
             echo "project_created=true" >> $GITHUB_ENV
           fi
           set -e
@@ -122,25 +126,25 @@ jobs:
           project: '${{ github.event.repository.name }}'
           path: '.'
           format: 'HTML'
-          out: '.' # this is the default, no need to specify unless you wish to override it
-          args: >
-            --failOnCVSS 7
+          out: '.' 
+          args: > # --failOnCVSS 7
             --enableRetired
             
       - name: Upload Test results
         uses: actions/upload-artifact@master
         with:
            name: Depcheck report
-           path: ${{github.workspace}}/reports
-      
+           path: ${{github.workspace}}/reports    
   
   DockerBuild:
     needs: SCA
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
     
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
+      with:
+          fetch-depth: 0
       
     - name: Docker Login
       run: |

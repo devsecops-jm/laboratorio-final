@@ -3,7 +3,7 @@ name: SCA
 on:
   push:
     branches:
-      - feature-jm-sysadm #main
+      - none #feature-jm-sysadm #main
       #- '**'
 jobs:
   
