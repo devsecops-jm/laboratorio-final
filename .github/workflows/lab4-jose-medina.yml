@@ -3,11 +3,11 @@ name: DevSecOps-jm-sysadm
 on:
   push:
     branches:
-      - main #feature-jm-sysadm #main
+      - feature-jm-sysadm #main
       #- '**'
 jobs:
   SAST:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
