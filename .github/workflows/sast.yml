@@ -2,7 +2,7 @@ name: SAST
 on:
   push:
     branches:
-      - test #feature-jm-sysadm
+      - none #feature-jm-sysadm
   pull_request:
     types: [opened, synchronize, reopened]
 jobs:
