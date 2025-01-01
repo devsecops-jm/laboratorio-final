@@ -24,8 +24,6 @@ jobs:
       - name: Validando proyecto en SonarCloud
         id: validateProjectOnSonar
         run: |
-          #pwd
-          #ls -R
           set +e
           curl -f -X POST -u '${{ secrets.SONAR_TOKEN }}:' 'https://sonarcloud.io/api/projects/create' \
           -d 'name=${{ github.event.repository.name }}' -d 'project=${{ github.event.repository.name }}' \

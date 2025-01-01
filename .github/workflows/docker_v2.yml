@@ -32,10 +32,10 @@ jobs:
     DockerScan:
         #needs: DockerBuild
         runs-on: ubuntu-latest
-        permissions:
-          contents: read
-          actions: read
-          checks: write
+        # permissions:
+        #   contents: read
+        #   actions: read
+        #   checks: write
 
         steps:
 
@@ -62,7 +62,7 @@ jobs:
             format: 'sarif'
             output: 'trivy-results.sarif'
 
-        - name: Run Trivy vulnerability scanner - table view
+        - name: Run Trivy vulnerability scanner - Format table view
           uses: aquasecurity/trivy-action@master
           with:
             image-ref: 'jmsysadm/nodejs'
@@ -84,15 +84,11 @@ jobs:
             name: TrivyScanReport
             path: ${{github.workspace}}/trivy-results.sarif
           
-        - name: Upload Trivy scan results to GitHub Security tab
-          uses: github/codeql-action/upload-sarif@v3
-          with:
-            sarif_file: 'trivy-results.sarif'
 
         # - name: Fail build on High/Criticial Vulnerabilities
         #   uses: aquasecurity/trivy-action@master
         #   with:
-        #     scan-type: "image"
+        #     scan-type: "fs"
         #     format: table
         #     scan-ref: .
             # severity: HIGH,CRITICAL
