@@ -54,26 +54,42 @@ jobs:
           run: |
             docker pull jmsysadm/nodejs
 
-        - name: Run Trivy vulnerability scanner
+        - name: Run Trivy vulnerability scanner - Generate SARIF Report
           uses: aquasecurity/trivy-action@master
-          id: TrivyScan
+          id: TrivyScanReport
           with:
             image-ref: 'jmsysadm/nodejs'
             format: 'sarif'
             output: 'trivy-results.sarif'
 
-        # - name: Upload Test results
-        #   uses: actions/upload-artifact@master
-        #   with:
-        #     name: TrivyScan
-        #     path: ${{github.workspace}}/reports
+        - name: Run Trivy vulnerability scanner - table view
+          uses: aquasecurity/trivy-action@master
+          with:
+            image-ref: 'jmsysadm/nodejs'
+            format: 'table'
 
         - name: Validar Ubicación archivo SARIF
           run: |
-            pwd
-            ls -la | grep trivy-results.sarif
-            chmod 777 trivy-results.sarif
+            if [ -f "trivy-results.sarif" ]; then
+              echo "Reporte trivy scan existente"
+              echo "Activando full privilegios sobre el reporte"
+              chmod 777 trivy-results.sarif
+            else 
+              echo "No se encuentra el reporte"
+            fi
 
+        - name: Upload Test results
+          run: |
+            if [ -f "trivy-results.sarif" ]; then
+              echo "Uploading Artifacts"
+              uses: actions/upload-artifact@master
+                with:
+                name: TrivyScanReport
+                path: ${{github.workspace}}/trivy-results.sarif
+            else 
+              echo "No se encuentra el reporte"
+            fi
+          
         - name: Upload Trivy scan results to GitHub Security tab
           uses: github/codeql-action/upload-sarif@v3
           with:
