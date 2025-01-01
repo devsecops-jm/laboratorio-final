@@ -71,12 +71,13 @@ jobs:
 
         - name: Validar Ubicación archivo SARIF
           run: |
+            pwd
             ls -la | grep trivy-results.sarif
 
-        # - name: Upload Trivy scan results to GitHub Security tab
-        #   uses: github/codeql-action/upload-sarif@v3
-        #   with:
-        #     sarif_file: 'trivy-results.sarif'
+        - name: Upload Trivy scan results to GitHub Security tab
+          uses: github/codeql-action/upload-sarif@v3
+          with:
+            sarif_file: 'trivy-results.sarif'
 
         # - name: Fail build on High/Criticial Vulnerabilities
         #   uses: aquasecurity/trivy-action@master
