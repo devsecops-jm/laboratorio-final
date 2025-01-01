@@ -3,7 +3,7 @@ name: Docker CI/CD
 on:
   push:
     branches:
-      - feature-jm-sysadm #main
+      - none # feature-jm-sysadm #main
       #- '**'
 jobs:
     DockerBuild:
@@ -25,7 +25,6 @@ jobs:
                 echo "Se habilita permiso de ejecución de archivo packsge.json"
                 chmod 777 package.json
                 npm run build
-                ls -R
               else 
                 echo "Otro tipo de proyecto"
               fi 
