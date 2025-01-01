@@ -28,7 +28,7 @@ jobs:
           run: npx tsc --init
 
         - name: List Directory
-          run: ls -R | grep -i ./dist
+          run: ls -R ./dist
 
         - name: Docker Login
           uses: docker/login-action@v3.0.0
