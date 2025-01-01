@@ -14,21 +14,18 @@ jobs:
           uses: actions/checkout@v4
           with:
               fetch-depth: 0
-        
+
+        - name: Install Next js 
+          run: npm install next@latest react@latest react-dom@latest
+
         - name: Install Dependency project
           run: npm install
 
-        - name: Build project with NPM
-          run: npm rebuild
-
-        - name: Install TypeScript
-          run: npm install -g typescript
-
-        - name: Compile project with TSC
-          run: npx tsc --init
+        - name: Compile project with Next
+          run: npm run build
 
         - name: List Directory
-          run: ls -R ./dist
+          run: ls -R ./next
 
         - name: Docker Login
           uses: docker/login-action@v3.0.0
