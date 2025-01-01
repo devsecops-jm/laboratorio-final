@@ -49,11 +49,36 @@ jobs:
           run: |
             docker pull jmsysadm/nodejs:latest
     
-        - name: Run Trivy Scan
-          uses: aquasecurity/trivy-action@master
+        # - name: Run Trivy Scan
+        #   uses: aquasecurity/trivy-action@master
+        #   with:
+        #     image-ref: 'jmsysadm/nodejs:latest'
+        #     format: 'table'
+
+        - name: Run Trivy vulnerability scanner
+          uses: aquasecurity/trivy-action@0.28.0
           with:
             image-ref: 'jmsysadm/nodejs:latest'
-            format: 'table'
+            format: 'sarif'
+            output: 'trivy-results.sarif'
+
+        - name: Upload Trivy scan results to GitHub Security tab
+          uses: github/codeql-action/upload-sarif@v3
+          with:
+            sarif_file: 'trivy-results.sarif'
+
+        - name: Fail build on High/Criticial Vulnerabilities
+          uses: aquasecurity/trivy-action@master
+          with:
+            scan-type: "image"
+            format: table
+            scan-ref: .
+            # severity: HIGH,CRITICAL
+            # ignore-unfixed: true
+            # exit-code: 1
+            # On a subsequent call to the action we know trivy is already installed so can skip this
+            # skip-setup-trivy: true
+
     
     Deploy:
         needs: DockerScan
