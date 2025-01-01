@@ -23,11 +23,11 @@ jobs:
         
         - name: Docker Build
           run: |
-            docker build --tag node:23.5.0-alpine3.21 .
+            docker build --tag jmsysadm/nodejs:latest .
     
         - name: Push Docker
           run: |
-            docker push node:23.5.0-alpine3.21
+            docker push jmsysadm/nodejs:latest
     
     DockerScan:
         needs: DockerBuild
@@ -40,19 +40,19 @@ jobs:
               fetch-depth: 0
           
         - name: Docker Login
-          uses: docker/login-action@v3.0.0
+          uses: docker/login-action@v3
           with:
             username: ${{ secrets.DOCKER_USER }}
             password: ${{ secrets.DOCKER_PASSWORD }}
         
         - name: Pull Docker
           run: |
-            docker pull node:23.5.0-alpine3.21
+            docker pull jmsysadm/nodejs:latest
     
         - name: Run Trivy Scan
           uses: aquasecurity/trivy-action@master
           with:
-            image-ref: 'node:23.5.0-alpine3.21'
+            image-ref: 'jmsysadm/nodejs:latest'
             format: 'table'
     
     Deploy:
