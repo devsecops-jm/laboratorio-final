@@ -116,7 +116,7 @@ jobs:
         with:
           fetch-depth: 0
           
-      - name: Build project with NPM
+      - name: Install Dependency project with NPM
         run: npm install
 
       - name: Depcheck
