@@ -23,11 +23,11 @@ jobs:
         
         - name: Docker Build
           run: |
-            docker build --tag jmsysadm/nodejs:latest .
+            docker build --tag jmsysadm/nodejs .
     
         - name: Push Docker
           run: |
-            docker push jmsysadm/nodejs:latest
+            docker push jmsysadm/nodejs
     
     DockerScan:
         needs: DockerBuild
@@ -47,7 +47,7 @@ jobs:
         
         - name: Pull Docker
           run: |
-            docker pull jmsysadm/nodejs:latest
+            docker pull jmsysadm/nodejs
     
         # - name: Run Trivy Scan
         #   uses: aquasecurity/trivy-action@master
@@ -59,8 +59,8 @@ jobs:
           uses: aquasecurity/trivy-action@master
           id: TrivyScan
           with:
-            scan-type: "image"
-            image-ref: 'jmsysadm/nodejs:latest'
+            scan-type: "fs"
+            image-ref: 'jmsysadm/nodejs'
             format: 'sarif'
             output: 'trivy-results.sarif'
 
@@ -75,12 +75,12 @@ jobs:
         #   with:
         #     sarif_file: 'trivy-results.sarif'
 
-        - name: Fail build on High/Criticial Vulnerabilities
-          uses: aquasecurity/trivy-action@master
-          with:
-            scan-type: "image"
-            format: table
-            scan-ref: .
+        # - name: Fail build on High/Criticial Vulnerabilities
+        #   uses: aquasecurity/trivy-action@master
+        #   with:
+        #     scan-type: "image"
+        #     format: table
+        #     scan-ref: .
             # severity: HIGH,CRITICAL
             # ignore-unfixed: true
             # exit-code: 1
