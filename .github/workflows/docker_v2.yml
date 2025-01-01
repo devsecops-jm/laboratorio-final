@@ -56,16 +56,24 @@ jobs:
         #     format: 'table'
 
         - name: Run Trivy vulnerability scanner
-          uses: aquasecurity/trivy-action@0.28.0
+          uses: aquasecurity/trivy-action@master
+          id: TrivyScan
           with:
+            scan-type: "image"
             image-ref: 'jmsysadm/nodejs:latest'
             format: 'sarif'
             output: 'trivy-results.sarif'
 
-        - name: Upload Trivy scan results to GitHub Security tab
-          uses: github/codeql-action/upload-sarif@v3
+        - name: Upload Test results
+          uses: actions/upload-artifact@master
           with:
-            sarif_file: 'trivy-results.sarif'
+            name: TrivyScan
+            path: ${{github.workspace}}/reports
+
+        # - name: Upload Trivy scan results to GitHub Security tab
+        #   uses: github/codeql-action/upload-sarif@v3
+        #   with:
+        #     sarif_file: 'trivy-results.sarif'
 
         - name: Fail build on High/Criticial Vulnerabilities
           uses: aquasecurity/trivy-action@master
