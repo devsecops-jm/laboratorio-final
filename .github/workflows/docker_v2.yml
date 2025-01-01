@@ -63,11 +63,15 @@ jobs:
             format: 'sarif'
             output: 'trivy-results.sarif'
 
-        - name: Upload Test results
-          uses: actions/upload-artifact@master
-          with:
-            name: TrivyScan
-            path: ${{github.workspace}}/reports
+        # - name: Upload Test results
+        #   uses: actions/upload-artifact@master
+        #   with:
+        #     name: TrivyScan
+        #     path: ${{github.workspace}}/reports
+
+        - name: Validar Ubicación archivo SARIF
+          run: |
+            ls -la | grep trivy-results.sarif
 
         # - name: Upload Trivy scan results to GitHub Security tab
         #   uses: github/codeql-action/upload-sarif@v3
