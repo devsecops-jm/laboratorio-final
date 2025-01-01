@@ -20,7 +20,6 @@ jobs:
 
         - name: Build project with NPM
           run: npm build
-            ls -R
 
         - name: List Directory
           run: ls -R
