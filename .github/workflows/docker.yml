@@ -18,12 +18,14 @@ jobs:
         - name: Install Dependency project with NPM
           run: npm install
 
-        - name: Build project with tsc
-          run: |
-            npm rebuild \
-            npm install -g typescript \
-            npx tsc --init
+        - name: Build project with NPM
+          run: npm rebuild
 
+        - name: Install TSC
+          run: npm install -g typescript
+
+        - name: Compile project with tsc
+          run: npx tsc --init
 
         - name: List Directory
           run: ls -R
