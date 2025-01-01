@@ -15,8 +15,8 @@ jobs:
           with:
               fetch-depth: 0
 
-        - name: Install Next js 
-          run: npm install next@latest react@latest react-dom@latest
+        # - name: Install Next js 
+        #   run: npm install next@latest react@latest react-dom@latest
 
         - name: Install Dependency project
           run: npm install
