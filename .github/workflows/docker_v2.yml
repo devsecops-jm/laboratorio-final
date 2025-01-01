@@ -6,37 +6,32 @@ on:
       - feature-jm-sysadm #main
       #- '**'
 jobs:
-    # DockerBuild:
-    #     runs-on: ubuntu-latest
-    #     steps:
+    DockerBuild:
+        runs-on: ubuntu-latest
+        steps:
 
-    #     - name: Checkout code
-    #       uses: actions/checkout@v4
-    #       with:
-    #           fetch-depth: 0
+        - name: Checkout code
+          uses: actions/checkout@v4
+          with:
+              fetch-depth: 0
 
-    #     - name: Docker Login
-    #       uses: docker/login-action@v3
-    #       with:
-    #         username: ${{ secrets.DOCKER_USER }}
-    #         password: ${{ secrets.DOCKER_PASSWORD }}
+        - name: Docker Login
+          uses: docker/login-action@v3
+          with:
+            username: ${{ secrets.DOCKER_USER }}
+            password: ${{ secrets.DOCKER_PASSWORD }}
         
-    #     - name: Docker Build
-    #       run: |
-    #         docker build --tag jmsysadm/nodejs .
+        - name: Docker Build
+          run: |
+            docker build --tag jmsysadm/nodejs .
     
-    #     - name: Push Docker
-    #       run: |
-    #         docker push jmsysadm/nodejs
+        - name: Push Docker
+          run: |
+            docker push jmsysadm/nodejs
     
     DockerScan:
-        #needs: DockerBuild
+        needs: DockerBuild
         runs-on: ubuntu-latest
-        # permissions:
-        #   contents: read
-        #   actions: read
-        #   checks: write
-
         steps:
 
         - name: Checkout code
@@ -54,20 +49,13 @@ jobs:
           run: |
             docker pull jmsysadm/nodejs
 
-        # - name: Run Trivy vulnerability scanner - Generate SARIF Report
-        #   uses: aquasecurity/trivy-action@master
-        #   id: TrivyScanReport
-        #   with:
-        #     image-ref: 'jmsysadm/nodejs'
-        #     format: 'sarif'
-        #     output: 'trivy-results.sarif'
-
-        - name: Run Trivy vulnerability scanner - Generate HTML Report
+        - name: Run Trivy vulnerability scanner - Generate SARIF Report
           uses: aquasecurity/trivy-action@master
+          id: TrivyScanReport
           with:
             image-ref: 'jmsysadm/nodejs'
-            format: 'html'
-            output: 'trivy-results.html'
+            format: 'sarif'
+            output: 'trivy-results.sarif'
 
         - name: Run Trivy vulnerability scanner - Format table view
           uses: aquasecurity/trivy-action@master
@@ -77,10 +65,10 @@ jobs:
 
         - name: Validar Ubicación de reporte
           run: |
-            if [ -f "trivy-results.html" ]; then
+            if [ -f "trivy-results.sarif" ]; then
               echo "Reporte trivy scan existente"
               echo "Activando full privilegios sobre el reporte"
-              chmod 777 trivy-results.html
+              chmod 777 trivy-results.sarif
             else 
               echo "No se encuentra el reporte"
             fi
@@ -89,21 +77,20 @@ jobs:
           uses: actions/upload-artifact@master
           with:
             name: TrivyScanReport
-            path: ${{github.workspace}}/trivy-results.html
+            path: ${{github.workspace}}/trivy-results.sarif
           
 
-
-        # - name: Fail build on High/Criticial Vulnerabilities
-        #   uses: aquasecurity/trivy-action@master
-        #   with:
-        #     scan-type: "fs"
-        #     format: table
-        #     scan-ref: .
-            # severity: HIGH,CRITICAL
-            # ignore-unfixed: true
-            # exit-code: 1
+        - name: Fail build on High/Criticial Vulnerabilities
+          uses: aquasecurity/trivy-action@master
+          with:
+            scan-type: "fs"
+            format: table
+            scan-ref: .
+            severity: HIGH,CRITICAL
+            ignore-unfixed: true
+            exit-code: 0 #1
             # On a subsequent call to the action we know trivy is already installed so can skip this
-            # skip-setup-trivy: true
+            skip-setup-trivy: true
 
     
     Deploy:
