@@ -15,17 +15,28 @@ jobs:
           with:
               fetch-depth: 0
 
-        # - name: Install Next js 
-        #   run: npm install next@latest react@latest react-dom@latest
-
         - name: Install Dependency project
           run: npm install
 
         - name: Compile project with Next
-          run: npm run build
+          run: |
+              if [ -f "package.json" ]; then
+                echo "Proyecto utiliza archivo package.json"
+                echo "Se habilita permiso de ejecución de archivo packsge.json"
+                chmod 777 package.json
+                npm run build
+                ls -R
+              else 
+                echo "Otro tipo de proyecto"
+              fi 
 
         - name: List Directory
-          run: ls -R ./next
+          run: |
+             if [ -d "./next" ]; then
+                echo "Se identifica el directorio de proyecto Next - Compilados"
+              else 
+                echo "No se encuentra el proyecto Compilados"
+              fi
 
         - name: Docker Login
           uses: docker/login-action@v3.0.0
