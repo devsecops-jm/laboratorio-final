@@ -33,7 +33,10 @@ jobs:
         #needs: DockerBuild
         runs-on: ubuntu-latest
         permissions:
-          actions: write
+          contents: read
+          actions: read
+          checks: write
+
         steps:
 
         - name: Checkout code
