@@ -84,6 +84,7 @@ jobs:
             name: TrivyScanReport
             path: ${{github.workspace}}/trivy-results.sarif
           
+        # - name: Run Trivy vulnerability scanner - Generate HTML Report
 
         # - name: Fail build on High/Criticial Vulnerabilities
         #   uses: aquasecurity/trivy-action@master
