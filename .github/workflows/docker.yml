@@ -19,7 +19,7 @@ jobs:
           run: npm install
 
         - name: Build project with NPM
-          run: npm build
+          run: npm rebuild
 
         - name: List Directory
           run: ls -R
