@@ -15,12 +15,16 @@ jobs:
           with:
               fetch-depth: 0
         
+        - name: Install Dependency project with NPM
+          run: npm install
+
         - name: Build project with NPM
-          run: |
-            npm install \
-            npm build \
+          run: npm build
             ls -R
-          
+
+        - name: List Directory
+          run: ls -R
+
         - name: Docker Login
           uses: docker/login-action@v3.0.0
           with:
