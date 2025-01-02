@@ -15,13 +15,12 @@ jobs:
         with:
           fetch-depth: 0
 
-
       - name: SATS - Set Environment Variables
         run: |
           echo "BRANCH_NAME=${{ github.ref_name }}" >> $GITHUB_ENV
           echo "ORG_NAME=devsecops-jm" >> $GITHUB_ENV
 
-      - name: Validando proyecto en SonarCloud
+      - name: Validate SonarCloud Project
         id: eval-sonarcloud
         env:
           DSO_TK_SONARCLOUD: ${{ secrets.SONAR_TOKEN}}
@@ -55,24 +54,6 @@ jobs:
             echo "El proyecto ya existe en SonarCloud."
             echo "project_created=false" >> $GITHUB_ENV
           fi
-
-        # set +e
-        # curl -f -X POST -u '${{ secrets.SONAR_TOKEN }}:' 'https://sonarcloud.io/api/projects/create' \
-        # -d 'name=${{ github.event.repository.name }}' -d 'project=${{ github.event.repository.name }}' \
-        # -d 'organization=$ORG_NAME' -d 'visibility=public'
-        # if [ "$"?" -ne 0 ]; then
-        #   echo $?
-        #   echo "Proyecto ya existe en Sonarcloud"
-        #   echo "project_created=false" >> $GITHUB_ENV
-        # else
-        #   echo "Proyecto ${{ github.event.repository.name }} creado exitosamente en Sonarcloud"
-          
-        #   echo "Se establece rama $BRANCH_NAME como rama por defecto"
-        #   curl -X POST -u '${{ secrets.SONAR_TOKEN }}:' 'https://sonarcloud.io/api/project_branches/rename' \
-        #   -d 'name=$BRANCH_NAME' -d 'project=${{ github.event.repository.name }}'
-        #   echo "project_created=true" >> $GITHUB_ENV
-        # fi
-        # set -e
 
       - name: Perform Initial Analysis (if Project Created)
         if: env.project_created == 'true'
@@ -191,7 +172,6 @@ jobs:
       run: |
         docker push jmsysadm/nodejs 
 
-
   DockerScan:
     needs: DockerBuild
     runs-on: ubuntu-latest
@@ -222,7 +202,7 @@ jobs:
         #output: 'trivy-results.sarif'
         severity: HIGH,CRITICAL
         #ignore-unfixed: true
-        exit-code: 0 # 1
+        exit-code:  1
 
     - name: Validar Ubicación de reporte
       run: |
