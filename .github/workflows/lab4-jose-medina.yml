@@ -3,7 +3,7 @@ name: DevSecOps-jm-sysadm
 on:
   push:
     branches:
-      - feature-jm-sysadm #main
+      - main
       #- '**'
 jobs:
 
