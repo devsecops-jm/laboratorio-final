@@ -23,7 +23,7 @@ jobs:
         
         - name: Docker Build
           run: |
-            docker build --tag jmsysadm/nodejs .
+            docker build -t jmsysadm/nodejs .
     
         - name: Push Docker
           run: |
@@ -94,6 +94,9 @@ jobs:
             username: ${{ secrets.DOCKER_USER }}
             password: ${{ secrets.DOCKER_PASSWORD }}
 
-        - name: Push Docker
+            # Agregar lógica para evaluar si el docker está en running y eliminarlo antes de desplegar una nueva versión
+        - name: Deploy Docker Lab4-Container With App
           run: |
-            docker run -d jmsysadm/nodejs -p 3000:3000
+            # docker stop lab4-container
+            # docker rm lab4-container
+            docker run --name lab4-container -d -p 3000:3000 -t jmsysadm/nodejs
