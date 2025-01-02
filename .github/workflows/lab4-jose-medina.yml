@@ -29,6 +29,7 @@ jobs:
           -d 'name=${{ github.event.repository.name }}' -d 'project=${{ github.event.repository.name }}' \
           -d 'organization=$ORG_NAME' -d 'visibility=public'
           if [ $? -ne 0 ]; then
+            echo $?
             echo "Proyecto ya existe en Sonarcloud"
             echo "project_created=false" >> $GITHUB_ENV
           else
