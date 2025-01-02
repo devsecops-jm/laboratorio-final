@@ -49,19 +49,20 @@ jobs:
           run: |
             docker pull jmsysadm/nodejs
 
-        - name: Run Trivy vulnerability scanner - Generate SARIF Report
-          uses: aquasecurity/trivy-action@master
-          id: TrivyScanReport
-          with:
-            image-ref: 'jmsysadm/nodejs'
-            format: 'sarif'
-            output: 'trivy-results.sarif'
-
         # - name: Run Trivy vulnerability scanner - Format table view
         #   uses: aquasecurity/trivy-action@master
         #   with:
         #     image-ref: 'jmsysadm/nodejs'
         #     format: 'table'
+
+        - name: Run Trivy vulnerability scanner - Generate SARIF Report
+          uses: aquasecurity/trivy-action@master
+          id: TrivyScanReport
+          with:
+            scan-type: "image"
+            image-ref: 'jmsysadm/nodejs'
+            format: 'sarif'
+            output: 'trivy-results.sarif'
 
         - name: Validar Ubicación de reporte
           run: |
@@ -83,7 +84,7 @@ jobs:
         - name: Fail build on High/Criticial Vulnerabilities
           uses: aquasecurity/trivy-action@master
           with:
-            scan-type: "fs"
+            scan-type: "image"
             format: table
             scan-ref: .
             severity: HIGH,CRITICAL
