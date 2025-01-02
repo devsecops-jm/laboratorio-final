@@ -3,7 +3,7 @@ name: DevSecOps-jm-sysadm
 on:
   push:
     branches:
-      - none #main # feature-jm-sysadm #main
+      - feature-jm-sysadm #main
       #- '**'
 jobs:
 
@@ -145,36 +145,73 @@ jobs:
           fetch-depth: 0
       
     - name: Docker Login
-      run: |
-          echo "En construcción"
-    
-    - name: Deploy Project
-      run: |
-          echo "En construcción"
-
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USER }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        
     - name: Docker Build
       run: |
-          echo "En construcción"
+        docker build --tag jmsysadm/nodejs .
 
     - name: Push Docker
       run: |
-          echo "En construcción"
+        docker push jmsysadm/nodejs 
+
 
   DockerScan:
     needs: DockerBuild
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
     
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+      
     - name: Docker Login
-      run: |
-          echo "En construcción"
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USER }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
     
     - name: Pull Docker
       run: |
-          echo "En construcción"
+        docker pull jmsysadm/nodejs
 
-    - name: Run Trivy Scan
+    - name: Run Trivy vulnerability scanner - Format Table Report
+      uses: aquasecurity/trivy-action@master
+      id: TrivyScanReport
+      with:
+        scan-type: "image"
+        format: 'table'
+        image-ref: 'jmsysadm/nodejs'
+        #output: 'trivy-results.sarif'
+        severity: HIGH,CRITICAL
+        #ignore-unfixed: true
+        exit-code: 0 # 1
+
+    - name: Validar Ubicación de reporte
       run: |
-          echo "En construcción"
+        if [ -f "trivy-results.sarif" ]; then
+          echo "Reporte trivy scan existente"
+          echo "Activando full privilegios sobre el reporte"
+          chmod 777 trivy-results.sarif
+        else 
+          echo "No se encuentra el reporte"
+        fi
 
+    # - name: Upload Test results
+    #   uses: actions/upload-artifact@master
+    #   with:
+    #     name: TrivyScanReport
+    #     path: ${{github.workspace}}/trivy-results.sarif
+
+  Deploy:
+    needs: DockerScan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ejecución de Proceso de despliegue de código
+        run: |
+          echo "En construcción - Deploy SaaS"
     

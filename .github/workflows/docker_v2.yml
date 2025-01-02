@@ -1,9 +1,9 @@
-name: Docker CI/CD
+name: Docker CI/CD v2
 
 on:
   push:
     branches:
-      - feature-jm-sysadm #main
+      - none # feature-jm-sysadm #main
       #- '**'
 jobs:
     DockerBuild:
@@ -60,9 +60,9 @@ jobs:
           id: TrivyScanReport
           with:
             scan-type: "image"
-            format: 'sarif'
+            format: 'table'
             image-ref: 'jmsysadm/nodejs'
-            output: 'trivy-results.sarif'
+            #output: 'trivy-results.sarif'
             severity: HIGH,CRITICAL
             #ignore-unfixed: true
             exit-code: 0 # 1
