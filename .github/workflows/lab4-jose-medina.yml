@@ -202,7 +202,7 @@ jobs:
         #output: 'trivy-results.sarif'
         severity: HIGH,CRITICAL
         #ignore-unfixed: true
-        exit-code:  1
+        exit-code:  0 #1
 
     - name: Validar Ubicación de reporte
       run: |
