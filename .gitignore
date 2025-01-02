@@ -1,0 +1,3 @@
+.\.github\workflows\docker_v2-yml
+.\.github\workflows\sast.yml
+.\.github\workflows\sca_v2.yml

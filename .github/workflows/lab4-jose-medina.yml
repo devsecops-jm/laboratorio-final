@@ -3,7 +3,7 @@ name: DevSecOps-jm-sysadm
 on:
   push:
     branches:
-      - main
+      - feature-jm-sysadm # main
       #- '**'
 jobs:
 
@@ -139,7 +139,7 @@ jobs:
           path: '.'
           format: 'HTML'
           out: '.' 
-          args: > # --failOnCVSS 7
+          args: > # --failOnCVSS 4
             --enableRetired
             
       - name: Upload Test results
