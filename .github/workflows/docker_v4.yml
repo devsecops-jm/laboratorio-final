@@ -88,5 +88,5 @@ jobs:
           run: |
             docker build -t ${repo} .
             docker tag ${repo}:latest ${registry}/${repo}:${GITHUB_RUN_NUMBER}
-            docker push ${repo_tag}
+            docker push ${registry}/${repo}:${GITHUB_RUN_NUMBER}
 
