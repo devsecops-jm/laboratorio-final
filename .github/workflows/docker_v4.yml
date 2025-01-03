@@ -126,7 +126,7 @@ jobs:
           env:
             KUBECONFIG: /kubeconfig
           run: |
-            mkdir -p /kubeconfig
+            sudo mkdir -p /kubeconfig
             aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }} --region ${{ secrets.REGION }} --kubeconfig ${KUBECONFIG}
             echo "KUBECONFIG=${KUBECONFIG}" >> $GITHUB_ENV
 
