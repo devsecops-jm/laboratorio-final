@@ -107,9 +107,18 @@ jobs:
             aws-secret-access-key: ${{ secrets.SECRET_ACCESS_KEY }}
             aws-region: ${{ secrets.REGION }}
 
-            # Agregar lógica para evaluar si el docker está en running y eliminarlo antes de desplegar una nueva versión
-        - name: Deploy Docker Lab4-Container With App
+        - name: Login AWSECR
+          uses: docker/login-action@v3
+          with:
+            registry: public.ecr.aws
+            username: ${{ secrets.ACCESS_KEY }}
+            password: ${{ secrets.SECRET_ACCESS_KEY }}
+          env:
+            aws-region: ${{ secrets.REGION }}
+
+        # Agregar lógica para evaluar si el docker está en running y eliminarlo antes de desplegar una nueva versión
+        - name: Build Image
           run: |
-            # docker stop lab4-container
-            # docker rm lab4-container
-            # docker run --name lab4-container -d -p 3000:3000 -t jmsysadm/nodejs
+            docker build -t devsecops-jm/lab4-deploy .
+            docker tag devsecops-jm/lab4-deploy:latest public.ecr.aws/f7f8x2e4/devsecops-jm/lab4-deploy:latest
+            docker push public.ecr.aws/f7f8x2e4/devsecops-jm/lab4-deploy:latest
