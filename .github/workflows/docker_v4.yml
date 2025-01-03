@@ -1,4 +1,4 @@
-name: Docker CI/CD v2
+name: Docker CI/CD v4
 
 on:
   push:
@@ -126,8 +126,8 @@ jobs:
           env:
             KUBECONFIG: ${{ runner.temp }}/kubeconfig
           run: |
-            aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }} --region ${{ secrets.REGION }} --kubeconfig $KUBECONFIG
-            echo "KUBECONFIG=$KUBECONFIG" >> $GITHUB_ENV
+            aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }} --region ${{ secrets.REGION }} --kubeconfig ${KUBECONFIG}
+            echo "KUBECONFIG=${KUBECONFIG}" >> $GITHUB_ENV
 
         - name: Deploy to EKS
           env: 
@@ -135,5 +135,5 @@ jobs:
             REPO: devsecops-jm/lab4-deploy
           run: |
             sed -i "s|image: REPOSITORY_TAG|image: $REGISTRY/$REPO:$GITHUB_RUN_NUMBER|g" ./deployment.yaml
-            # sed -i "s|image: REPOSITORY_TAG|image: ${REGISTRY}/${REPO}:${GITHUB_RUN_NUMBER}|g" ./deployment.yaml
+            cat ./deployment.yaml
             kubectl apply -f ./deployment.yaml 
