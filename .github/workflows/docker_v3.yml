@@ -3,7 +3,7 @@ name: Docker CI/CD v3
 on:
   push:
     branches:
-      - feature-jm-sysadm #main
+      - none #feature-jm-sysadm #main
       #- '**'
 env:
   # Use docker.io for Docker Hub if empty
