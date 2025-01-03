@@ -126,7 +126,7 @@ jobs:
           env:
             KUBECONFIG: ${{ runner.temp }}/kubeconfig
           run: |
-            aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }} --region ${{ secrets.REGION }} --kubeconfig ${KUBECONFIG}
+            aws ecs update-cluster-settings --name ${{ secrets.ECS_CLUSTER_NAME }} --region ${{ secrets.REGION }} --kubeconfig ${KUBECONFIG}
             echo "KUBECONFIG=${KUBECONFIG}" >> $GITHUB_ENV
 
         - name: Deploy to EKS
@@ -136,4 +136,4 @@ jobs:
           run: |
             sed -i "s|image: REPOSITORY_TAG|image: $REGISTRY/$REPO:$GITHUB_RUN_NUMBER|g" ./deployment.yaml
             cat ./deployment.yaml
-            kubectl apply -f ./deployment.yaml 
+            kubectl apply -f ./deployment.yaml
