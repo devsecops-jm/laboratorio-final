@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: Reddit-clone-deployment
+  name: Lab4-JM-SYSADM-kuber-project
   labels:
     app: kuber-project
 spec:
@@ -17,6 +17,6 @@ spec:
     spec:
       containers:
       - name: result-app
-        image: harshitsahu2311/reddit-clone-app
+        image: REPOSITORY_TAG
         ports:
         - containerPort: 3000
