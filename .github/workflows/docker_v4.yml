@@ -83,11 +83,10 @@ jobs:
         - name: Build && Push Image to private ECR 
           env: 
             REGISTRY: 863190499580.dkr.ecr.us-east-1.amazonaws.com
-            REPO: laboratorio-final
-            REPO_TAG: ${REGISTRY}/${REPO}:${GITHUB_RUN_NUMBER}
+            repo: laboratorio-final
+            REPO_TAG: ${REGISTRY}/${repo}:${GITHUB_RUN_NUMBER}
           run: |
-            echo 
-            docker build -t ${REPO} .
-            docker tag ${REPO}:latest ${REGISTRY}/${REPO}:${GITHUB_RUN_NUMBER}
+            docker build -t ${repo} .
+            docker tag ${repo}:latest ${REGISTRY}/${repo}:${GITHUB_RUN_NUMBER}
             docker push ${REPO_TAG}
 
