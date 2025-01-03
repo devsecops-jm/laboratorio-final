@@ -1,0 +1,6 @@
+docker-compose.services:
+  frontend:
+    container_name: lab4-jm-sysadm
+    image: jmsysadm/nodejs
+    ports:
+      - 3000:3000
