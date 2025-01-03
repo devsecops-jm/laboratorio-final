@@ -126,7 +126,7 @@ jobs:
           env:
             KUBECONFIG: ${{ runner.temp }}/kubeconfig
           run: |
-            aws ecs update-cluster-settings --name ${{ secrets.ECS_CLUSTER_NAME }} --region ${{ secrets.REGION }} --kubeconfig ${KUBECONFIG}
+            aws eks update-kubeconfig --name ${{ secrets.ECS_CLUSTER_NAME }} --region ${{ secrets.REGION }} --kubeconfig ${KUBECONFIG}
             echo "KUBECONFIG=${KUBECONFIG}" >> $GITHUB_ENV
 
         - name: Deploy to EKS
