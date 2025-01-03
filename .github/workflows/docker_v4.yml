@@ -83,7 +83,7 @@ jobs:
         - name: Build && Push Image to private ECR 
           env: 
             registry: 863190499580.dkr.ecr.us-east-1.amazonaws.com
-            repo: jmsysadm/nodejs
+            repo: devsecops-jm/lab4-deploy
             repo_tag: ${registry}/${repo}:${GITHUB_RUN_NUMBER}
           run: |
             docker build -t ${repo} .
