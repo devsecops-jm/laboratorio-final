@@ -88,6 +88,6 @@ jobs:
           run: |
             echo 
             docker build -t ${REPO} .
-            docker tag ${REPO}:latest ${REPO_TAG}
+            docker tag ${REPO}:latest ${REGISTRY}/${REPO}:${GITHUB_RUN_NUMBER}
             docker push ${REPO_TAG}
 
