@@ -160,9 +160,9 @@ jobs:
           env: 
             registry: 863190499580.dkr.ecr.us-east-1.amazonaws.com
             repo: devsecops-jm/lab4-deploy
-            repo_tag: ${registry}/${repo}:${github_run_number}
+            repo_tag: ${registry}/${repo}:${github_run_id}
           run: |
             docker build -t ${repo} .
-            docker tag ${repo}:latest ${registry}/${repo}:${github_run_number}
+            docker tag ${repo}:latest ${registry}/${repo}:${github_run_id}
             docker push ${repo_tag}
 
