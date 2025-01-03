@@ -83,7 +83,7 @@ jobs:
     #     #     name: TrivyScanReport
     #     #     path: ${{github.workspace}}/trivy-results.sarif
         
-    Deploy:
+    build-and-push-public-ecr:
       needs: DockerBuild #DockerScan
       runs-on: ubuntu-latest
       
@@ -117,8 +117,52 @@ jobs:
             aws-region: ${{ secrets.REGION }}
 
         # Agregar lógica para evaluar si el docker está en running y eliminarlo antes de desplegar una nueva versión
-        - name: Build Image
+        - name: Build && Push Image to public ECR
           run: |
             docker build -t devsecops-jm/lab4-deploy .
-            docker tag devsecops-jm/lab4-deploy:latest public.ecr.aws/f7f8x2e4/devsecops-jm/lab4-deploy:latest
-            docker push public.ecr.aws/f7f8x2e4/devsecops-jm/lab4-deploy:latest
+            docker tag devsecops-jm/lab4-deploy:latest public.ecr.aws/f7f8x2e4/devsecops-jm/lab4-deploy:$GITHUB_RUN_ID
+            docker push public.ecr.aws/f7f8x2e4/devsecops-jm/lab4-deploy:$GITHUB_RUN_ID
+
+    build-and-push-private-ecr:
+      needs: build-and-push-public-ecr #DockerScan
+      runs-on: ubuntu-latest
+      steps:
+
+        - name: Checkout code
+          uses: actions/checkout@v4
+          with:
+              fetch-depth: 0
+
+        - name: Docker Login
+          uses: docker/login-action@v3
+          with:
+            username: ${{ secrets.DOCKER_USER }}
+            password: ${{ secrets.DOCKER_PASSWORD }}
+
+        - name: Login AWS
+          uses: aws-actions/configure-aws-credentials@v4
+          with:
+            aws-access-key-id: ${{ secrets.ACCESS_KEY }}
+            aws-secret-access-key: ${{ secrets.SECRET_ACCESS_KEY }}
+            aws-region: ${{ secrets.REGION }}
+
+        - name: Login AWSECR
+          uses: docker/login-action@v3
+          with:
+            registry: 863190499580.dkr.ecr.us-east-1.amazonaws.com
+            username: ${{ secrets.ACCESS_KEY }}
+            password: ${{ secrets.SECRET_ACCESS_KEY }}
+          env:
+            aws-region: ${{ secrets.REGION }}
+
+        # Agregar lógica para evaluar si el docker está en running y eliminarlo antes de desplegar una nueva versión
+        - name: Build && Push Image to private ECR 
+          env: 
+            REGISTRY: 863190499580.dkr.ecr.us-east-1.amazonaws.com
+            REPO: devsecops-jm/lab4-deploy
+            REPO_TAG: ${REGISTRY}/${REPO}:${GITHUB_RUN_NUMBER}
+          run: |
+            docker build -t ${REPO} .
+            docker tag ${REPO}:latest ${REGISTRY}/${REPO}:${GITHUB_RUN_NUMBER}
+            docker push ${REPO_TAG}
+
