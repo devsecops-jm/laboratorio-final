@@ -82,11 +82,11 @@ jobs:
         # Agregar lógica para evaluar si el docker está en running y eliminarlo antes de desplegar una nueva versión
         - name: Build && Push Image to private ECR 
           env: 
-            REGISTRY: 863190499580.dkr.ecr.us-east-1.amazonaws.com
-            repo: laboratorio-final
-            REPO_TAG: ${REGISTRY}/${repo}:${GITHUB_RUN_NUMBER}
+            registry: 863190499580.dkr.ecr.us-east-1.amazonaws.com
+            repo: devsecops-jm/lab4-deploy
+            repo_tag: ${registry}/${repo}:${GITHUB_RUN_NUMBER}
           run: |
             docker build -t ${repo} .
-            docker tag ${repo}:latest ${REGISTRY}/${repo}:${GITHUB_RUN_NUMBER}
-            docker push ${REPO_TAG}
+            docker tag ${repo}:latest ${registry}/${repo}:${GITHUB_RUN_NUMBER}
+            docker push ${repo_tag}
 
