@@ -3,85 +3,9 @@ name: Docker CI/CD v2
 on:
   push:
     branches:
-      - none #feature-jm-sysadm #main
+      - feature-jm-sysadm #main
       #- '**'
 jobs:
-    # DockerBuild:
-    #     runs-on: ubuntu-latest
-    #     steps:
-
-    #     - name: Checkout code
-    #       uses: actions/checkout@v4
-    #       with:
-    #           fetch-depth: 0
-
-    #     - name: Docker Login
-    #       uses: docker/login-action@v3
-    #       with:
-    #         username: ${{ secrets.DOCKER_USER }}
-    #         password: ${{ secrets.DOCKER_PASSWORD }}
-        
-    #     - name: Docker Build
-    #       run: |
-    #         docker build -t jmsysadm/nodejs .
-    
-    #     - name: Push Docker
-    #       run: |
-    #         docker push jmsysadm/nodejs
-    
-    # DockerScan:
-    #     needs: DockerBuild
-    #     runs-on: ubuntu-latest
-    #     steps:
-
-    #     - name: Checkout code
-    #       uses: actions/checkout@v4
-    #       with:
-    #           fetch-depth: 0
-          
-    #     - name: Docker Login
-    #       uses: docker/login-action@v3
-    #       with:
-    #         username: ${{ secrets.DOCKER_USER }}
-    #         password: ${{ secrets.DOCKER_PASSWORD }}
-        
-    #     - name: Pull Docker
-    #       run: |
-    #         docker pull jmsysadm/nodejs
-
-    #     # - name: Run Trivy vulnerability scanner - Format table view
-    #     #   uses: aquasecurity/trivy-action@master
-    #     #   with:
-    #     #     image-ref: 'jmsysadm/nodejs'
-    #     #     format: 'table'
-
-    #     - name: Run Trivy vulnerability scanner - Generate SARIF Report
-    #       uses: aquasecurity/trivy-action@master
-    #       id: TrivyScanReport
-    #       with:
-    #         scan-type: "image"
-    #         format: 'table'
-    #         image-ref: 'jmsysadm/nodejs'
-    #         #output: 'trivy-results.sarif'
-    #         severity: HIGH,CRITICAL
-    #         ignore-unfixed: true
-    #         exit-code: 0 # 1
-
-    #     - name: Validar Ubicación de reporte
-    #       run: |
-    #         if [ -f "trivy-results.sarif" ]; then
-    #           echo "Reporte trivy scan existente"
-    #           echo "Activando full privilegios sobre el reporte"
-    #           chmod 777 trivy-results.sarif
-    #         else 
-    #           echo "No se encuentra el reporte"
-    #         fi
-
-    #     # - name: Upload Test results
-    #     #   uses: actions/upload-artifact@master
-    #     #   with:
-    #     #     name: TrivyScanReport
-    #     #     path: ${{github.workspace}}/trivy-results.sarif
         
     # build-and-push-public-ecr:
     #   needs: DockerBuild #DockerScan
@@ -146,7 +70,7 @@ jobs:
             aws-secret-access-key: ${{ secrets.SECRET_ACCESS_KEY }}
             aws-region: ${{ secrets.REGION }}
 
-        - name: Login AWSECR
+        - name: Login AWS-ECR
           uses: docker/login-action@v3
           with:
             registry: 863190499580.dkr.ecr.us-east-1.amazonaws.com
@@ -158,11 +82,12 @@ jobs:
         # Agregar lógica para evaluar si el docker está en running y eliminarlo antes de desplegar una nueva versión
         - name: Build && Push Image to private ECR 
           env: 
-            registry: 863190499580.dkr.ecr.us-east-1.amazonaws.com
-            repo: devsecops-jm/lab4-deploy
-            repo_tag: ${registry}/${repo}:{GITHUB_RUN_NUMBER}
+            REGISTRY: 863190499580.dkr.ecr.us-east-1.amazonaws.com
+            REPO: laboratorio-final
+            REPO_TAG: ${REGISTRY}/${REPO}:${GITHUB_RUN_NUMBER}
           run: |
-            docker build -t ${repo} .
-            docker tag ${repo}:latest ${registry}/${repo}:${GITHUB_RUN_NUMBER}
-            docker push ${repo_tag}
+            echo 
+            docker build -t ${REPO} .
+            docker tag ${REPO}:latest ${REPO_TAG}
+            docker push ${REPO_TAG}
 
