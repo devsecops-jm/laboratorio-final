@@ -134,6 +134,6 @@ jobs:
             REGISTRY: 863190499580.dkr.ecr.us-east-1.amazonaws.com
             REPO: devsecops-jm/lab4-deploy
           run: |
-            sed -i "s|image: REPOSITORY_TAG|image: $REGYSTRY/$REPO:$GITHUB_RUN_NUMBER|g" ./deployment.yml
+            sed -i "s|image: REPOSITORY_TAG|image: $REGISTRY/$REPO:$GITHUB_RUN_NUMBER|g" ./deployment.yml
             cat ./deployment.yml
             kubectl apply -f ./deployment.yml
