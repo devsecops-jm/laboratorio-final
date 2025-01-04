@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: Lab4-JM-SYSADM-kuber-project
+  name: lab4-jm-sysadm-kuber-project
   labels:
     app: kuber-project
 spec:
