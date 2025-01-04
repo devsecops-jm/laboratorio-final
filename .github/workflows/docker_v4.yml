@@ -6,49 +6,8 @@ on:
       - feature-jm-sysadm #main
       #- '**'
 jobs:
-        
-    # build-and-push-public-ecr:
-    #   needs: DockerBuild #DockerScan
-    #   runs-on: ubuntu-latest
-      
-    #   steps:
-
-    #     - name: Checkout code
-    #       uses: actions/checkout@v4
-    #       with:
-    #           fetch-depth: 0
-
-    #     - name: Docker Login
-    #       uses: docker/login-action@v3
-    #       with:
-    #         username: ${{ secrets.DOCKER_USER }}
-    #         password: ${{ secrets.DOCKER_PASSWORD }}
-
-    #     - name: Login AWS
-    #       uses: aws-actions/configure-aws-credentials@v4
-    #       with:
-    #         aws-access-key-id: ${{ secrets.ACCESS_KEY }}
-    #         aws-secret-access-key: ${{ secrets.SECRET_ACCESS_KEY }}
-    #         aws-region: ${{ secrets.REGION }}
-
-    #     - name: Login AWSECR
-    #       uses: docker/login-action@v3
-    #       with:
-    #         registry: public.ecr.aws
-    #         username: ${{ secrets.ACCESS_KEY }}
-    #         password: ${{ secrets.SECRET_ACCESS_KEY }}
-    #       env:
-    #         aws-region: ${{ secrets.REGION }}
-
-    #     # Agregar lógica para evaluar si el docker está en running y eliminarlo antes de desplegar una nueva versión
-    #     - name: Build && Push Image to public ECR
-    #       run: |
-    #         docker build -t devsecops-jm/lab4-deploy .
-    #         docker tag devsecops-jm/lab4-deploy:latest public.ecr.aws/f7f8x2e4/devsecops-jm/lab4-deploy:$GITHUB_RUN_ID
-    #         docker push public.ecr.aws/f7f8x2e4/devsecops-jm/lab4-deploy:$GITHUB_RUN_ID
 
     build-and-push-private-ecr:
-      #needs: DockerBuild #build-and-push-public-ecr #DockerScan
       runs-on: ubuntu-latest
       steps:
 
@@ -56,12 +15,6 @@ jobs:
           uses: actions/checkout@v4
           with:
               fetch-depth: 0
-
-        # - name: Docker Login
-        #   uses: docker/login-action@v3
-        #   with:
-        #     username: ${{ secrets.DOCKER_USER }}
-        #     password: ${{ secrets.DOCKER_PASSWORD }}
 
         - name: Login AWS
           uses: aws-actions/configure-aws-credentials@v4
@@ -73,7 +26,7 @@ jobs:
         - name: Login AWS-ECR
           uses: docker/login-action@v3
           with:
-            registry: 863190499580.dkr.ecr.us-east-1.amazonaws.com
+            registry: ${{ secrets.REGISTRY }}
             username: ${{ secrets.ACCESS_KEY }}
             password: ${{ secrets.SECRET_ACCESS_KEY }}
           env:
@@ -82,8 +35,8 @@ jobs:
         # Agregar lógica para evaluar si el docker está en running y eliminarlo antes de desplegar una nueva versión
         - name: Build && Push Image to private ECR 
           env: 
-            REGISTRY: 863190499580.dkr.ecr.us-east-1.amazonaws.com
-            REPO: devsecops-jm/lab4-deploy
+            REGISTRY: ${{ secrets.REGISTRY }}
+            REPO: ${{ secrets.REPO }}
             #repo_tag: ${registry}/${repo}:${GITHUB_RUN_NUMBER}
           run: |
             docker build -t ${REPO} .
@@ -131,8 +84,8 @@ jobs:
 
         - name: Deploy to EKS
           env: 
-            REGISTRY: 863190499580.dkr.ecr.us-east-1.amazonaws.com
-            REPO: devsecops-jm/lab4-deploy
+            REGISTRY: ${{ secrets.REGISTRY }}
+            REPO: ${{ secrets.REPO }}
           run: |
             sed -i "s|image: REPOSITORY_TAG|image: $REGISTRY/$REPO:$GITHUB_RUN_NUMBER|g" ./deployment.yml
             # cat ./deployment.yml
