@@ -124,17 +124,16 @@ jobs:
 
         - name: Download Kube File
           env:
-            KUBECONFIG: /kubeconfig
+            KUBECONFIG: ${{ runner.temp }}/kubeconfig
           run: |
-            sudo mkdir -p /kubeconfig
-            aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }} --region ${{ secrets.REGION }} --kubeconfig ${KUBECONFIG}
-            echo "KUBECONFIG=${KUBECONFIG}" >> $GITHUB_ENV
+            aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }} --region ${{ secrets.REGION }} --kubeconfig $KUBECONFIG
+            echo "KUBECONFIG=$KUBECONFIG" >> $GITHUB_ENV
 
         - name: Deploy to EKS
           env: 
             REGISTRY: 863190499580.dkr.ecr.us-east-1.amazonaws.com
             REPO: devsecops-jm/lab4-deploy
           run: |
-            sed -i "s|image: REPOSITORY_TAG|image: 863190499580.dkr.ecr.us-east-1.amazonaws.com/devsecops-jm/lab4-deploy:$GITHUB_RUN_NUMBER|g" ./deployment.yml
+            sed -i "s|image: REPOSITORY_TAG|image: $REGYSTRY/$REPO:$GITHUB_RUN_NUMBER|g" ./deployment.yml
             cat ./deployment.yml
             kubectl apply -f ./deployment.yml
