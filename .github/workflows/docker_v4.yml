@@ -1,9 +1,9 @@
-name: Docker CI/CD v4
+name: Build Image and Deploy to EKS
 
 on:
   push:
     branches:
-      - feature-jm-sysadm #main
+      - none # feature-jm-sysadm #main
       #- '**'
 jobs:
 
@@ -37,7 +37,6 @@ jobs:
           env: 
             REGISTRY: ${{ secrets.REGISTRY }}
             REPO: ${{ secrets.REPO }}
-            #repo_tag: ${registry}/${repo}:${GITHUB_RUN_NUMBER}
           run: |
             docker build -t ${REPO} .
             docker tag ${REPO}:latest ${REGISTRY}/${REPO}:${GITHUB_RUN_NUMBER}

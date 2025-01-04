@@ -1,4 +1,4 @@
-name: LAB4-DevSecOps
+name: LAB4-DevSecOps-JM
 
 on:
   push:
@@ -6,6 +6,10 @@ on:
       - main
       #- '**'
 jobs:
+
+#----------------------------------------------->
+# SCAN CODE SAST WITH SONARCLOUD
+#----------------------------------------------->
 
   SAST:
     runs-on: ubuntu-latest
@@ -118,6 +122,10 @@ jobs:
 
           echo "El proyecto cumple con el Quality Gate y no tiene vulnerabilidades críticas. Continuando sin problemas."
 
+#----------------------------------------------->
+# SCAN CODE SCA WITH DEPCHECK
+#----------------------------------------------->
+
   SCA:
     needs: SAST
     runs-on: ubuntu-latest
@@ -148,7 +156,11 @@ jobs:
            name: Depcheck report
            path: ${{github.workspace}}/reports    
   
-  DockerBuild:
+#----------------------------------------------->
+# CONTAINER BUILD WITH DOCKER
+#----------------------------------------------->
+
+  ContainerBuild:
     needs: SCA
     runs-on: ubuntu-latest
     steps:
@@ -172,8 +184,12 @@ jobs:
       run: |
         docker push jmsysadm/nodejs 
 
-  DockerScan:
-    needs: DockerBuild
+#----------------------------------------------->
+# IMAGE SCAN WITH TRIVY
+#----------------------------------------------->
+
+  ImageScan:
+    needs: ContainerBuild
     runs-on: ubuntu-latest
     steps:
     
@@ -220,19 +236,97 @@ jobs:
     #     name: TrivyScanReport
     #     path: ${{github.workspace}}/trivy-results.sarif
 
-  Deploy:
-    needs: DockerScan
+#----------------------------------------------->
+# CONTAINER BUILD AND PUSH TO ECR
+#----------------------------------------------->
+
+  BuildPushPrivateECR:
+    needs: ImageScan
     runs-on: ubuntu-latest
     steps:
-      - name: Docker Login
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+            fetch-depth: 0
+
+      - name: Login AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.REGION }}
+
+      - name: Login AWS-ECR
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKER_USER }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          registry: ${{ secrets.REGISTRY }}
+          username: ${{ secrets.ACCESS_KEY }}
+          password: ${{ secrets.SECRET_ACCESS_KEY }}
+        env:
+          aws-region: ${{ secrets.REGION }}
 
-            # Agregar lógica para evaluar si el docker está en running y eliminarlo antes de desplegar una nueva versión
-      - name: Deploy Docker Lab4-Container With App
+      # Agregar lógica para evaluar si el docker está en running y eliminarlo antes de desplegar una nueva versión
+      - name: Build && Push Image to private ECR 
+        env: 
+          REGISTRY: ${{ secrets.REGISTRY }}
+          REPO: ${{ secrets.REPO }}
         run: |
-          # docker stop lab4-container
-          # docker rm lab4-container
-          docker run --name lab4-container -d -p 3000:3000 -t jmsysadm/nodejs
+          docker build -t ${REPO} .
+          docker tag ${REPO}:latest ${REGISTRY}/${REPO}:${GITHUB_RUN_NUMBER}
+          docker push ${REGISTRY}/${REPO}:${GITHUB_RUN_NUMBER}
+
+#----------------------------------------------->
+# INSTALL KUBECTL AND DEPLOY TO EKS
+#----------------------------------------------->
+
+  InstallKubectl:
+    needs: BuildPushPrivateECR
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: install_kubectl
+        run: |
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl.sha256"
+          echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check
+          sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+          kubectl version --client
+
+#----------------------------------------------->
+# DEPLOY TO EKS
+#----------------------------------------------->
+
+  DeployEKS:
+    needs: InstallKubectl
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Login AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.REGION }}
+
+      - name: Download Kube File
+        env:
+          KUBECONFIG: ${{ runner.temp }}/kubeconfig
+        run: |
+          aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }} --region ${{ secrets.REGION }} --kubeconfig $KUBECONFIG
+          echo "KUBECONFIG=$KUBECONFIG" >> $GITHUB_ENV
+
+      - name: Deploy to EKS
+        env: 
+          REGISTRY: ${{ secrets.REGISTRY }}
+          REPO: ${{ secrets.REPO }}
+        run: |
+          sed -i "s|image: REPOSITORY_TAG|image: $REGISTRY/$REPO:$GITHUB_RUN_NUMBER|g" ./deployment.yml
+          # cat ./deployment.yml
+          kubectl apply -f ./deployment.yml
+

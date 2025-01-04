@@ -6,126 +6,87 @@ on:
       - none #feature-jm-sysadm #main
       #- '**'
 jobs:
-    # DockerBuild:
-    #     runs-on: ubuntu-latest
-    #     steps:
+    DockerBuild:
+        runs-on: ubuntu-latest
+        steps:
 
-    #     - name: Checkout code
-    #       uses: actions/checkout@v4
-    #       with:
-    #           fetch-depth: 0
+        - name: Checkout code
+          uses: actions/checkout@v4
+          with:
+              fetch-depth: 0
 
-    #     - name: Docker Login
-    #       uses: docker/login-action@v3
-    #       with:
-    #         username: ${{ secrets.DOCKER_USER }}
-    #         password: ${{ secrets.DOCKER_PASSWORD }}
+        - name: Docker Login
+          uses: docker/login-action@v3
+          with:
+            username: ${{ secrets.DOCKER_USER }}
+            password: ${{ secrets.DOCKER_PASSWORD }}
         
-    #     - name: Docker Build
-    #       run: |
-    #         docker build -t jmsysadm/nodejs .
+        - name: Docker Build
+          run: |
+            docker build -t jmsysadm/nodejs .
     
-    #     - name: Push Docker
-    #       run: |
-    #         docker push jmsysadm/nodejs
+        - name: Push Docker
+          run: |
+            docker push jmsysadm/nodejs
     
-    # DockerScan:
-    #     needs: DockerBuild
-    #     runs-on: ubuntu-latest
-    #     steps:
+    DockerScan:
+        needs: DockerBuild
+        runs-on: ubuntu-latest
+        steps:
 
-    #     - name: Checkout code
-    #       uses: actions/checkout@v4
-    #       with:
-    #           fetch-depth: 0
+        - name: Checkout code
+          uses: actions/checkout@v4
+          with:
+              fetch-depth: 0
           
-    #     - name: Docker Login
-    #       uses: docker/login-action@v3
-    #       with:
-    #         username: ${{ secrets.DOCKER_USER }}
-    #         password: ${{ secrets.DOCKER_PASSWORD }}
+        - name: Docker Login
+          uses: docker/login-action@v3
+          with:
+            username: ${{ secrets.DOCKER_USER }}
+            password: ${{ secrets.DOCKER_PASSWORD }}
         
-    #     - name: Pull Docker
-    #       run: |
-    #         docker pull jmsysadm/nodejs
+        - name: Pull Docker
+          run: |
+            docker pull jmsysadm/nodejs
 
-    #     # - name: Run Trivy vulnerability scanner - Format table view
-    #     #   uses: aquasecurity/trivy-action@master
-    #     #   with:
-    #     #     image-ref: 'jmsysadm/nodejs'
-    #     #     format: 'table'
+        # - name: Run Trivy vulnerability scanner - Format table view
+        #   uses: aquasecurity/trivy-action@master
+        #   with:
+        #     image-ref: 'jmsysadm/nodejs'
+        #     format: 'table'
 
-    #     - name: Run Trivy vulnerability scanner - Generate SARIF Report
-    #       uses: aquasecurity/trivy-action@master
-    #       id: TrivyScanReport
-    #       with:
-    #         scan-type: "image"
-    #         format: 'table'
-    #         image-ref: 'jmsysadm/nodejs'
-    #         #output: 'trivy-results.sarif'
-    #         severity: HIGH,CRITICAL
-    #         ignore-unfixed: true
-    #         exit-code: 0 # 1
+        - name: Run Trivy vulnerability scanner - Generate SARIF Report
+          uses: aquasecurity/trivy-action@master
+          id: TrivyScanReport
+          with:
+            scan-type: "image"
+            format: 'table'
+            image-ref: 'jmsysadm/nodejs'
+            #output: 'trivy-results.sarif'
+            severity: HIGH,CRITICAL
+            ignore-unfixed: true
+            exit-code: 0 # 1
 
-    #     - name: Validar Ubicación de reporte
-    #       run: |
-    #         if [ -f "trivy-results.sarif" ]; then
-    #           echo "Reporte trivy scan existente"
-    #           echo "Activando full privilegios sobre el reporte"
-    #           chmod 777 trivy-results.sarif
-    #         else 
-    #           echo "No se encuentra el reporte"
-    #         fi
+        - name: Validar Ubicación de reporte
+          run: |
+            if [ -f "trivy-results.sarif" ]; then
+              echo "Reporte trivy scan existente"
+              echo "Activando full privilegios sobre el reporte"
+              chmod 777 trivy-results.sarif
+            else 
+              echo "No se encuentra el reporte"
+            fi
 
-    #     # - name: Upload Test results
-    #     #   uses: actions/upload-artifact@master
-    #     #   with:
-    #     #     name: TrivyScanReport
-    #     #     path: ${{github.workspace}}/trivy-results.sarif
+        # - name: Upload Test results
+        #   uses: actions/upload-artifact@master
+        #   with:
+        #     name: TrivyScanReport
+        #     path: ${{github.workspace}}/trivy-results.sarif
         
-    # build-and-push-public-ecr:
-    #   needs: DockerBuild #DockerScan
-    #   runs-on: ubuntu-latest
-      
-    #   steps:
-
-    #     - name: Checkout code
-    #       uses: actions/checkout@v4
-    #       with:
-    #           fetch-depth: 0
-
-    #     - name: Docker Login
-    #       uses: docker/login-action@v3
-    #       with:
-    #         username: ${{ secrets.DOCKER_USER }}
-    #         password: ${{ secrets.DOCKER_PASSWORD }}
-
-    #     - name: Login AWS
-    #       uses: aws-actions/configure-aws-credentials@v4
-    #       with:
-    #         aws-access-key-id: ${{ secrets.ACCESS_KEY }}
-    #         aws-secret-access-key: ${{ secrets.SECRET_ACCESS_KEY }}
-    #         aws-region: ${{ secrets.REGION }}
-
-    #     - name: Login AWSECR
-    #       uses: docker/login-action@v3
-    #       with:
-    #         registry: public.ecr.aws
-    #         username: ${{ secrets.ACCESS_KEY }}
-    #         password: ${{ secrets.SECRET_ACCESS_KEY }}
-    #       env:
-    #         aws-region: ${{ secrets.REGION }}
-
-    #     # Agregar lógica para evaluar si el docker está en running y eliminarlo antes de desplegar una nueva versión
-    #     - name: Build && Push Image to public ECR
-    #       run: |
-    #         docker build -t devsecops-jm/lab4-deploy .
-    #         docker tag devsecops-jm/lab4-deploy:latest public.ecr.aws/f7f8x2e4/devsecops-jm/lab4-deploy:$GITHUB_RUN_ID
-    #         docker push public.ecr.aws/f7f8x2e4/devsecops-jm/lab4-deploy:$GITHUB_RUN_ID
-
-    build-and-push-private-ecr:
-      #needs: DockerBuild #build-and-push-public-ecr #DockerScan
+    build-and-push-public-ecr:
+      needs: DockerBuild #DockerScan
       runs-on: ubuntu-latest
+      
       steps:
 
         - name: Checkout code
@@ -133,11 +94,11 @@ jobs:
           with:
               fetch-depth: 0
 
-        # - name: Docker Login
-        #   uses: docker/login-action@v3
-        #   with:
-        #     username: ${{ secrets.DOCKER_USER }}
-        #     password: ${{ secrets.DOCKER_PASSWORD }}
+        - name: Docker Login
+          uses: docker/login-action@v3
+          with:
+            username: ${{ secrets.DOCKER_USER }}
+            password: ${{ secrets.DOCKER_PASSWORD }}
 
         - name: Login AWS
           uses: aws-actions/configure-aws-credentials@v4
@@ -149,20 +110,15 @@ jobs:
         - name: Login AWSECR
           uses: docker/login-action@v3
           with:
-            registry: 863190499580.dkr.ecr.us-east-1.amazonaws.com
+            registry: public.ecr.aws
             username: ${{ secrets.ACCESS_KEY }}
             password: ${{ secrets.SECRET_ACCESS_KEY }}
           env:
             aws-region: ${{ secrets.REGION }}
 
         # Agregar lógica para evaluar si el docker está en running y eliminarlo antes de desplegar una nueva versión
-        - name: Build && Push Image to private ECR 
-          env: 
-            registry: 863190499580.dkr.ecr.us-east-1.amazonaws.com
-            repo: devsecops-jm/lab4-deploy
-            repo_tag: ${registry}/${repo}:{GITHUB_RUN_NUMBER}
+        - name: Build && Push Image to public ECR
           run: |
-            docker build -t ${repo} .
-            docker tag ${repo}:latest ${registry}/${repo}:${GITHUB_RUN_NUMBER}
-            docker push ${repo_tag}
-
+            docker build -t devsecops-jm/lab4-deploy .
+            docker tag devsecops-jm/lab4-deploy:latest public.ecr.aws/f7f8x2e4/devsecops-jm/lab4-deploy:$GITHUB_RUN_ID
+            docker push public.ecr.aws/f7f8x2e4/devsecops-jm/lab4-deploy:$GITHUB_RUN_ID
