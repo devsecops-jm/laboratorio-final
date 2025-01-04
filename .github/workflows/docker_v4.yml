@@ -135,5 +135,5 @@ jobs:
             REPO: devsecops-jm/lab4-deploy
           run: |
             sed -i "s|image: REPOSITORY_TAG|image: $REGISTRY/$REPO:$GITHUB_RUN_NUMBER|g" ./deployment.yml
-            cat ./deployment.yml
+            # cat ./deployment.yml
             kubectl apply -f ./deployment.yml
