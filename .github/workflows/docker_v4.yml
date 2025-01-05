@@ -3,7 +3,7 @@ name: Build Image and Deploy to EKS
 on:
   push:
     branches:
-      - feature-jm-sysadm #main
+      - none #feature-jm-sysadm #main
       #- '**'
 jobs:
 
@@ -41,6 +41,17 @@ jobs:
             docker build -t ${REPO} .
             docker tag ${REPO}:latest ${REGISTRY}/${REPO}:${GITHUB_RUN_NUMBER}
             docker push ${REGISTRY}/${REPO}:${GITHUB_RUN_NUMBER}
+            echo "image=${REGISTRY}/${REPO}:${GITHUB_RUN_NUMBER}" >> $GITHUB_OUTPUT
+
+        - name: Add new task definition on ECS
+          id: task_definition
+          uses: aws-actions/amazon-ecs-render-task-definition@
+          with:
+            task-definition-template: ./task-definition.json
+            container-name: ${{ secrets.CONTAINER_NAME }}
+            image: ${{ steps.build-and-push-private-ecr.outputs.image }}
+            aws-region: ${{ secrets.REGION }}
+  
 
 #     install_kubectl:
 #       needs: build-and-push-private-ecr
