@@ -45,7 +45,7 @@ jobs:
             echo "image=${REGISTRY}/${REPO}:${GITHUB_RUN_NUMBER}" >> $GITHUB_OUTPUT
 
         - name: Add new task definition on ECS
-          id: task_definition
+          id: task_def
           uses: aws-actions/amazon-ecs-render-task-definition@v1
           with:
             task-definition: lab4-task-def-dso-jm-revision1.json
@@ -55,7 +55,7 @@ jobs:
         - name: Deploy Amazon ECS task definition
           uses: aws-actions/amazon-ecs-deploy-task-definition@v1
           with:
-            task-definition: ${{ steps.task_definition.outputs.task-definition }}
+            task-definition: ${{ steps.task_def.outputs.task-definition }}
             service: lab4-app-deploy
             cluster: ${{ secrets.ECS_CLUSTER_NAME }}
             wait-for-service-stability: true
