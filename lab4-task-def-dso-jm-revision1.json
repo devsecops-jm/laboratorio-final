@@ -65,6 +65,5 @@
     },
     "registeredAt": "2025-01-05T15:39:20.756Z",
     "registeredBy": "arn:aws:iam::863190499580:user/jose.medina",
-    /** "enableFaultInjection": false, **/
     "tags": []
 }
