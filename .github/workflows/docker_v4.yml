@@ -3,7 +3,7 @@ name: Build Image and Deploy to EKS
 on:
   push:
     branches:
-      - none #feature-jm-sysadm #main
+      - feature-jm-sysadm #main
       #- '**'
 jobs:
 
@@ -34,6 +34,7 @@ jobs:
 
         # Agregar lógica para evaluar si el docker está en running y eliminarlo antes de desplegar una nueva versión
         - name: Build && Push Image to private ECR 
+          id: build-and-push
           env: 
             REGISTRY: ${{ secrets.REGISTRY }}
             REPO: ${{ secrets.REPO }}
@@ -45,13 +46,19 @@ jobs:
 
         - name: Add new task definition on ECS
           id: task_definition
-          uses: aws-actions/amazon-ecs-render-task-definition@
+          uses: aws-actions/amazon-ecs-render-task-definition@v1
           with:
-            task-definition-template: ./task-definition.json
-            container-name: ${{ secrets.CONTAINER_NAME }}
-            image: ${{ steps.build-and-push-private-ecr.outputs.image }}
-            aws-region: ${{ secrets.REGION }}
+            task-definition: lab4-task-def-dso-jm-revision1.json
+            container-name: lab4-app-deploy
+            image: ${{ steps.build-and-push.outputs.image }}
   
+        - name: Deploy Amazon ECS task definition
+          uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+          with:
+            task-definition: ${{ steps.task_definition.outputs.task-definition }}
+            service: lab4-app-deploy
+            cluster: ${{ secrets.ECS_CLUSTER_NAME }}
+            wait-for-service-stability: true
 
 #     install_kubectl:
 #       needs: build-and-push-private-ecr

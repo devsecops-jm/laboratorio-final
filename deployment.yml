@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: lab4-jm-sysadm-kuber-project
+  name: lab4-jm-sysadm-ecs-project
 
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: lab4-jm-sysadm-kuber-project
+      app: lab4-jm-sysadm-ecs-project
   template:
     metadata:
       labels: 
-        app: lab4-jm-sysadm-kuber-project
+        app: lab4-jm-sysadm-ecs-project
     
     spec:
       containers:
-      - name: lab4-jm-sysadm-kuber-project
+      - name: lab4-jm-sysadm-ecs-project
         image: REPOSITORY_TAG
         resources:
           requests:
@@ -26,11 +26,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: lab4-jm-sysadm-kuber-project-svc
+  name: lab4-jm-sysadm-ecs-project-svc
 
 spec:
   selector:
-    app: lab4-jm-sysadm-kuber-project
+    app: lab4-jm-sysadm-ecs-project
 
   ports:
     - name: http
