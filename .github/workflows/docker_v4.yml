@@ -3,7 +3,7 @@ name: Build Image and Deploy to EKS
 on:
   push:
     branches:
-      - none # feature-jm-sysadm #main
+      - feature-jm-sysadm #main
       #- '**'
 jobs:
 
@@ -42,50 +42,50 @@ jobs:
             docker tag ${REPO}:latest ${REGISTRY}/${REPO}:${GITHUB_RUN_NUMBER}
             docker push ${REGISTRY}/${REPO}:${GITHUB_RUN_NUMBER}
 
-    install_kubectl:
-      needs: build-and-push-private-ecr
-      runs-on: ubuntu-latest
-      steps:
+#     install_kubectl:
+#       needs: build-and-push-private-ecr
+#       runs-on: ubuntu-latest
+#       steps:
 
-        - name: install_kubectl
-          run: |
-            curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-            curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl.sha256"
-            echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check
-            sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
-            kubectl version --client
+#         - name: install_kubectl
+#           run: |
+#             curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+#             curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl.sha256"
+#             echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check
+#             sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+#             kubectl version --client
 
-#----------------------------------------------->
+# #----------------------------------------------->
 
-    deployToCluster:
-      needs: install_kubectl
-      runs-on: ubuntu-latest
-      steps:
+#     deployToCluster:
+#       needs: install_kubectl
+#       runs-on: ubuntu-latest
+#       steps:
 
-        - name: Checkout code
-          uses: actions/checkout@v4
-          with:
-            fetch-depth: 0
+#         - name: Checkout code
+#           uses: actions/checkout@v4
+#           with:
+#             fetch-depth: 0
 
-        - name: Login AWS Credentials
-          uses: aws-actions/configure-aws-credentials@v4
-          with:
-            aws-access-key-id: ${{ secrets.ACCESS_KEY }}
-            aws-secret-access-key: ${{ secrets.SECRET_ACCESS_KEY }}
-            aws-region: ${{ secrets.REGION }}
+#         - name: Login AWS Credentials
+#           uses: aws-actions/configure-aws-credentials@v4
+#           with:
+#             aws-access-key-id: ${{ secrets.ACCESS_KEY }}
+#             aws-secret-access-key: ${{ secrets.SECRET_ACCESS_KEY }}
+#             aws-region: ${{ secrets.REGION }}
 
-        - name: Download Kube File
-          env:
-            KUBECONFIG: ${{ runner.temp }}/kubeconfig
-          run: |
-            aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }} --region ${{ secrets.REGION }} --kubeconfig $KUBECONFIG
-            echo "KUBECONFIG=$KUBECONFIG" >> $GITHUB_ENV
+#         - name: Download Kube File
+#           env:
+#             KUBECONFIG: ${{ runner.temp }}/kubeconfig
+#           run: |
+#             aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }} --region ${{ secrets.REGION }} --kubeconfig $KUBECONFIG
+#             echo "KUBECONFIG=$KUBECONFIG" >> $GITHUB_ENV
 
-        - name: Deploy to EKS
-          env: 
-            REGISTRY: ${{ secrets.REGISTRY }}
-            REPO: ${{ secrets.REPO }}
-          run: |
-            sed -i "s|image: REPOSITORY_TAG|image: $REGISTRY/$REPO:$GITHUB_RUN_NUMBER|g" ./deployment.yml
-            # cat ./deployment.yml
-            kubectl apply -f ./deployment.yml
+#         - name: Deploy to EKS
+#           env: 
+#             REGISTRY: ${{ secrets.REGISTRY }}
+#             REPO: ${{ secrets.REPO }}
+#           run: |
+#             sed -i "s|image: REPOSITORY_TAG|image: $REGISTRY/$REPO:$GITHUB_RUN_NUMBER|g" ./deployment.yml
+#             # cat ./deployment.yml
+#             kubectl apply -f ./deployment.yml
