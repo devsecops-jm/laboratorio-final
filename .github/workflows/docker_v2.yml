@@ -22,7 +22,7 @@ jobs:
             password: ${{ secrets.DOCKER_PASSWORD }}
         
         - name: Setup Testcontainers Cloud Client
-          uses: atomicjar/testcontainers-cloud-setup-action@v1
+          uses: atomicjar/testcontainers-cloud-setup-action@main
           with:
             token: ${{ secrets.TC_CLOUD_TOKEN }}
 
