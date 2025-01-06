@@ -21,10 +21,10 @@ jobs:
             username: ${{ secrets.DOCKER_USER }}
             password: ${{ secrets.DOCKER_PASSWORD }}
         
-        - name: Setup Testcontainers Cloud Client
-          uses: atomicjar/testcontainers-cloud-setup-action@main
-          with:
-            token: ${{ secrets.TC_CLOUD_TOKEN }}
+        # - name: Setup Testcontainers Cloud Client
+        #   uses: atomicjar/testcontainers-cloud-setup-action@main
+        #   with:
+        #     token: ${{ secrets.TC_CLOUD_TOKEN }}
 
         - name: Docker Build
           run: |
