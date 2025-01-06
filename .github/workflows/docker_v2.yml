@@ -103,9 +103,9 @@ jobs:
           run: |
             docker pull jmsysadm/nodejs
 
-        - name: Stop and remove existing container
-          run: |
-            stop lab4-jm-sysadm || true && docker rm lab4-jm-sysadm || true
+        # - name: Stop and remove existing container
+        #   run: |
+        #     stop lab4-jm-sysadm || true && docker rm lab4-jm-sysadm || true
 
         - name: Run Docker container
           run: |
