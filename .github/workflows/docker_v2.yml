@@ -106,11 +106,11 @@ jobs:
         
         - name: Pull Docker
           run: |
-            sudo docker pull jmsysadm/nodejs
+            docker pull jmsysadm/nodejs
 
         - name: Stop and remove existing container
           run: |
-            docker stop lab4-jm-sysadm || true && docker rm lab4-jm-sysadm || true
+            stop lab4-jm-sysadm || true && docker rm lab4-jm-sysadm || true
 
         - name: Run Docker container
           run: |
