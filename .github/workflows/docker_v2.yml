@@ -23,11 +23,11 @@ jobs:
         
         - name: Docker Build
           run: |
-            docker build -t jmsysadm/nodejs:$GITHUB_RUN_NUMBER .
+            docker build -t jmsysadm/nodejs .
     
         - name: Push Docker
           run: |
-            docker push jmsysadm/nodejs:$GITHUB_RUN_NUMBER
+            docker push jmsysadm/nodejs
 
     DockerScan:
         needs: DockerBuild
@@ -47,7 +47,7 @@ jobs:
         
         - name: Pull Docker
           run: |
-            docker pull jmsysadm/nodejs:$GITHUB_RUN_NUMBER
+            docker pull jmsysadm/nodejs
 
         # - name: Run Trivy vulnerability scanner - Format table view
         #   uses: aquasecurity/trivy-action@master
@@ -61,7 +61,7 @@ jobs:
           with:
             scan-type: "image"
             format: 'table'
-            image-ref: 'jmsysadm/nodejs:$GITHUB_RUN_NUMBER'
+            image-ref: 'jmsysadm/nodejs'
             #output: 'trivy-results.sarif'
             severity: HIGH,CRITICAL
             ignore-unfixed: true
@@ -101,15 +101,24 @@ jobs:
         
         - name: Pull Docker
           run: |
-            docker pull jmsysadm/nodejs:$GITHUB_RUN_NUMBER
+            docker pull jmsysadm/nodejs
         
         # Agregar lógica de evaluación si el docker name existe en sttatus Running
-        # - name: Stop and remove existing container
-        #   run: |
-        #     stop lab4-jm-sysadm || true && docker rm lab4-jm-sysadm || true
+        - name: Stop and remove existing container
+          run: |
+            $containerName = "lab4-jm-sysadm"
+            $containerStatus = docker ps --filter "name=$containerName" --format "{{.Names}}"
+
+            if ($containerStatus -eq $containerName) {
+                Write-Output "El contenedor $containerName está OK"
+                stop $containerName
+                docker rm $containerName
+            } else {
+                Write-Output "El contenedor $containerName no está OK"
+            }
 
         - name: Run Docker container
           run: |
-            docker run -d --name lab4-jm-sysadm:$GITHUB_RUN_NUMBER -p 3000:3000 jmsysadm/nodejs:$GITHUB_RUN_NUMBER
+            docker run -d --name lab4-jm-sysadm -p 3000:3000 jmsysadm/nodejs
         
      
