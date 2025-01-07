@@ -3,7 +3,7 @@ name: Docker CI/CD v2
 on:
   push:
     branches:
-      - feature-jm-sysadm #main
+      - none #feature-jm-sysadm #main
       #- '**'
 jobs:
     DockerBuild:
@@ -105,8 +105,9 @@ jobs:
         
         # Agregar lógica de evaluación si el docker name existe en sttatus Running
         - name: Stop and remove existing container
+          env: 
+            containerName: lab4-jm-sysadm
           run: |
-            $containerName = "lab4-jm-sysadm"
             $containerStatus = docker ps --filter "name=$containerName" --format "{{.Names}}"
 
             if ($containerStatus -eq $containerName) {
@@ -114,12 +115,12 @@ jobs:
                 docker stop $containerName
                 docker rm $containerName
             } else {
-                Write-Output "Contenedor $containerName no existe"
+                Write-Output "Container $containerName no existe"
             }
 
         - name: Run Docker container
           run: |
-            Write-Output "Desplegando container actualizado"
+            Write-Output "Desplegando container $containerName actualizado"
             docker run -d --name lab4-jm-sysadm -p 3000:3000 jmsysadm/nodejs
         
      

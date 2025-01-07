@@ -346,12 +346,22 @@ jobs:
           docker pull jmsysadm/nodejs
       
       # Agregar lógica de evaluación si el docker name existe en sttatus Running
-      # - name: Stop and remove existing container
-      #   run: |
-      #     stop lab4-jm-sysadm || true && docker rm lab4-jm-sysadm || true
+      - name: Stop and remove existing container
+        env: 
+          containerName: lab4-jm-sysadm
+        run: |
+          $containerStatus = docker ps --filter "name=$containerName" --format "{{.Names}}"
+
+          if ($containerStatus -eq $containerName) {
+              Write-Output "Container $containerName identificado, deteniendo servicios"
+              docker stop $containerName
+              docker rm $containerName
+          } else {
+              Write-Output "Container $containerName no existe"
+          }
 
       - name: Run Docker container
         run: |
+          Write-Output "Desplegando container actualizado"
           docker run -d --name lab4-jm-sysadm -p 3000:3000 jmsysadm/nodejs
       
-
