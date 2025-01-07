@@ -161,6 +161,7 @@ jobs:
 #----------------------------------------------->
 
   DockerBuild:
+    needs: SCA
     runs-on: ubuntu-latest
     steps:
 
