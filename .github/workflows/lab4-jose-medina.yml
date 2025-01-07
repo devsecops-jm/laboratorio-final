@@ -1,4 +1,4 @@
-name: DevSecOps-jm-sysadm
+name: LAB4-DevSecOps-JM
 
 on:
   push:
@@ -6,6 +6,10 @@ on:
       - main
       #- '**'
 jobs:
+
+#----------------------------------------------->
+# SCAN CODE SAST WITH SONARCLOUD
+#----------------------------------------------->
 
   SAST:
     runs-on: ubuntu-latest
@@ -15,7 +19,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: SATS - Set Environment Variables
+      - name: Set Environment Variables
         run: |
           echo "BRANCH_NAME=${{ github.ref_name }}" >> $GITHUB_ENV
           echo "ORG_NAME=devsecops-jm" >> $GITHUB_ENV
@@ -118,6 +122,10 @@ jobs:
 
           echo "El proyecto cumple con el Quality Gate y no tiene vulnerabilidades críticas. Continuando sin problemas."
 
+#----------------------------------------------->
+# SCAN CODE SCA WITH DEPCHECK
+#----------------------------------------------->
+
   SCA:
     needs: SAST
     runs-on: ubuntu-latest
@@ -139,7 +147,7 @@ jobs:
           path: '.'
           format: 'HTML'
           out: '.' 
-          args: > # --failOnCVSS 7
+          args: > # --failOnCVSS 4
             --enableRetired
             
       - name: Upload Test results
@@ -148,7 +156,11 @@ jobs:
            name: Depcheck report
            path: ${{github.workspace}}/reports    
   
-  DockerBuild:
+#----------------------------------------------->
+# CONTAINER BUILD WITH DOCKER
+#----------------------------------------------->
+
+  ContainerBuild:
     needs: SCA
     runs-on: ubuntu-latest
     steps:
@@ -172,8 +184,12 @@ jobs:
       run: |
         docker push jmsysadm/nodejs 
 
-  DockerScan:
-    needs: DockerBuild
+#----------------------------------------------->
+# IMAGE SCAN WITH TRIVY
+#----------------------------------------------->
+
+  ImageScan:
+    needs: ContainerBuild
     runs-on: ubuntu-latest
     steps:
     
@@ -220,11 +236,132 @@ jobs:
     #     name: TrivyScanReport
     #     path: ${{github.workspace}}/trivy-results.sarif
 
-  Deploy:
-    needs: DockerScan
+#----------------------------------------------->
+# CONTAINER BUILD AND PUSH DOCKER HUB
+#----------------------------------------------->
+
+  DockerBuild:
     runs-on: ubuntu-latest
     steps:
-      - name: Ejecución de Proceso de despliegue de código
-        run: |
-          echo "En construcción - Deploy SaaS"
+
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+          fetch-depth: 0
+
+    - name: Docker Login
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USER }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
     
+    - name: Docker Build
+      run: |
+        docker build -t jmsysadm/nodejs .
+
+    - name: Push Docker
+      run: |
+        docker push jmsysadm/nodejs
+
+#----------------------------------------------->
+# CONTAINER SCAN TRIVY
+#----------------------------------------------->        
+
+  DockerScan:
+    needs: DockerBuild
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+          fetch-depth: 0
+      
+    - name: Docker Login
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USER }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+    
+    - name: Pull Docker
+      run: |
+        docker pull jmsysadm/nodejs
+
+    # - name: Run Trivy vulnerability scanner - Format table view
+    #   uses: aquasecurity/trivy-action@master
+    #   with:
+    #     image-ref: 'jmsysadm/nodejs'
+    #     format: 'table'
+
+    - name: Run Trivy vulnerability scanner - Generate SARIF Report
+      uses: aquasecurity/trivy-action@master
+      id: TrivyScanReport
+      with:
+        scan-type: "image"
+        format: 'table'
+        image-ref: 'jmsysadm/nodejs'
+        #output: 'trivy-results.sarif'
+        severity: HIGH,CRITICAL
+        ignore-unfixed: true
+        exit-code: 0 # 1
+
+    - name: Validar Ubicación de reporte
+      run: |
+        if [ -f "trivy-results.sarif" ]; then
+          echo "Reporte trivy scan existente"
+          echo "Activando full privilegios sobre el reporte"
+          chmod 777 trivy-results.sarif
+        else 
+          echo "No se encuentra el reporte"
+        fi
+
+    # - name: Upload Test results
+    #   uses: actions/upload-artifact@master
+    #   with:
+    #     name: TrivyScanReport
+    #     path: ${{github.workspace}}/trivy-results.sarif
+    
+#----------------------------------------------->
+# DEPLOY TO DOCKER DESKTOP
+#----------------------------------------------->
+
+  Deploy:
+    name: Deploy Docker Image
+    needs: DockerScan
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+            fetch-depth: 0
+
+      - name: Docker Login
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      
+      - name: Pull Docker
+        run: |
+          docker pull jmsysadm/nodejs
+      
+      # Agregar lógica de evaluación si el docker name existe en sttatus Running
+      - name: Stop and remove existing container
+        env: 
+          containerName: lab4-jm-sysadm
+        run: |
+          $containerStatus = docker ps --filter "name=$containerName" --format "{{.Names}}"
+
+          if ($containerStatus -eq $containerName) {
+              Write-Output "Container $containerName identificado, deteniendo servicios"
+              docker stop $containerName
+              docker rm $containerName
+          } else {
+              Write-Output "Container $containerName no existe"
+          }
+
+      - name: Run Docker container
+        run: |
+          Write-Output "Desplegando container actualizado"
+          docker run -d --name lab4-jm-sysadm -p 3000:3000 jmsysadm/nodejs
+      

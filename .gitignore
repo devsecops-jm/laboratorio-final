@@ -1,0 +1,10 @@
+
+/node_modules
+/packages
+
+
+/.github/workflows/docker_v2.yml
+/.github/workflows/docker_v3.yml
+/.github/workflows/docker_v4.yml
+/.github/workflows/sast.yml
+/.github/workflows/sca_v2.yml

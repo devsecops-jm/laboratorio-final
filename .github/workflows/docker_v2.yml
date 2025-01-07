@@ -3,7 +3,7 @@ name: Docker CI/CD v2
 on:
   push:
     branches:
-      - none # feature-jm-sysadm #main
+      - none #feature-jm-sysadm #main
       #- '**'
 jobs:
     DockerBuild:
@@ -23,12 +23,12 @@ jobs:
         
         - name: Docker Build
           run: |
-            docker build --tag jmsysadm/nodejs .
+            docker build -t jmsysadm/nodejs .
     
         - name: Push Docker
           run: |
             docker push jmsysadm/nodejs
-    
+
     DockerScan:
         needs: DockerBuild
         runs-on: ubuntu-latest
@@ -64,7 +64,7 @@ jobs:
             image-ref: 'jmsysadm/nodejs'
             #output: 'trivy-results.sarif'
             severity: HIGH,CRITICAL
-            #ignore-unfixed: true
+            ignore-unfixed: true
             exit-code: 0 # 1
 
         - name: Validar Ubicación de reporte
@@ -77,29 +77,50 @@ jobs:
               echo "No se encuentra el reporte"
             fi
 
-        # - name: Fail build on High/Criticial Vulnerabilities
-        #   uses: aquasecurity/trivy-action@master
+        # - name: Upload Test results
+        #   uses: actions/upload-artifact@master
         #   with:
-        #     scan-type: "image"
-        #     format: table
-        #     scan-ref: 'jmsysadm/nodejs'
-        #     severity: HIGH,CRITICAL
-        #     ignore-unfixed: true
-        #     exit-code: 0 # 1
-        #     # On a subsequent call to the action we know trivy is already installed so can skip this
-        #     # skip-setup-trivy: true
-
-        - name: Upload Test results
-          uses: actions/upload-artifact@master
-          with:
-            name: TrivyScanReport
-            path: ${{github.workspace}}/trivy-results.sarif
-    
-    Deploy:
-        needs: DockerScan
-        runs-on: ubuntu-latest
-        steps:
-          - name: Ejecución de Proceso de despliegue de código
-            run: |
-              echo "En construcción - Docker Scan"
+        #     name: TrivyScanReport
+        #     path: ${{github.workspace}}/trivy-results.sarif
         
+    deploy:
+      name: Deploy Docker Image
+      needs: DockerScan
+      runs-on: self-hosted
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v4
+          with:
+              fetch-depth: 0
+
+        - name: Docker Login
+          uses: docker/login-action@v3
+          with:
+            username: ${{ secrets.DOCKER_USER }}
+            password: ${{ secrets.DOCKER_PASSWORD }}
+        
+        - name: Pull Docker
+          run: |
+            docker pull jmsysadm/nodejs
+        
+        # Agregar lógica de evaluación si el docker name existe en sttatus Running
+        - name: Stop and remove existing container
+          env: 
+            containerName: lab4-jm-sysadm
+          run: |
+            $containerStatus = docker ps --filter "name=$containerName" --format "{{.Names}}"
+
+            if ($containerStatus -eq $containerName) {
+                Write-Output "Container $containerName identificado, deteniendo servicios"
+                docker stop $containerName
+                docker rm $containerName
+            } else {
+                Write-Output "Container $containerName no existe"
+            }
+
+        - name: Run Docker container
+          run: |
+            Write-Output "Desplegando container $containerName actualizado"
+            docker run -d --name lab4-jm-sysadm -p 3000:3000 jmsysadm/nodejs
+        
+     
