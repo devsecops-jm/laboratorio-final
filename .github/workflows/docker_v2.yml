@@ -110,15 +110,16 @@ jobs:
             $containerStatus = docker ps --filter "name=$containerName" --format "{{.Names}}"
 
             if ($containerStatus -eq $containerName) {
-                Write-Output "El contenedor $containerName está OK"
-                stop $containerName
+                Write-Output "Container $containerName identificado, deteniendo servicios"
+                docker stop $containerName
                 docker rm $containerName
             } else {
-                Write-Output "El contenedor $containerName no está OK"
+                Write-Output "Contenedor $containerName no existe"
             }
 
         - name: Run Docker container
           run: |
+            Write-Output "Desplegando container actualizado"
             docker run -d --name lab4-jm-sysadm -p 3000:3000 jmsysadm/nodejs
         
      
