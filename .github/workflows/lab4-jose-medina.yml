@@ -325,7 +325,7 @@ jobs:
 # DEPLOY TO DOCKER DESKTOP
 #----------------------------------------------->
 
-  deploy:
+  Deploy:
     name: Deploy Docker Image
     needs: DockerScan
     runs-on: self-hosted

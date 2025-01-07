@@ -3,7 +3,7 @@ name: Docker CI/CD v2
 on:
   push:
     branches:
-      - none #feature-jm-sysadm #main
+      - feature-jm-sysadm #main
       #- '**'
 jobs:
     DockerBuild:
@@ -23,11 +23,11 @@ jobs:
         
         - name: Docker Build
           run: |
-            docker build -t jmsysadm/nodejs .
+            docker build -t jmsysadm/nodejs:$GITHUB_RUN_NUMBER .
     
         - name: Push Docker
           run: |
-            docker push jmsysadm/nodejs
+            docker push jmsysadm/nodejs:$GITHUB_RUN_NUMBER
 
     DockerScan:
         needs: DockerBuild
@@ -47,7 +47,7 @@ jobs:
         
         - name: Pull Docker
           run: |
-            docker pull jmsysadm/nodejs
+            docker pull jmsysadm/nodejs:$GITHUB_RUN_NUMBER
 
         # - name: Run Trivy vulnerability scanner - Format table view
         #   uses: aquasecurity/trivy-action@master
@@ -61,7 +61,7 @@ jobs:
           with:
             scan-type: "image"
             format: 'table'
-            image-ref: 'jmsysadm/nodejs'
+            image-ref: 'jmsysadm/nodejs:$GITHUB_RUN_NUMBER'
             #output: 'trivy-results.sarif'
             severity: HIGH,CRITICAL
             ignore-unfixed: true
@@ -101,7 +101,7 @@ jobs:
         
         - name: Pull Docker
           run: |
-            docker pull jmsysadm/nodejs
+            docker pull jmsysadm/nodejs:$GITHUB_RUN_NUMBER
         
         # Agregar lógica de evaluación si el docker name existe en sttatus Running
         # - name: Stop and remove existing container
@@ -110,6 +110,6 @@ jobs:
 
         - name: Run Docker container
           run: |
-            docker run -d --name lab4-jm-sysadm -p 3000:3000 jmsysadm/nodejs
+            docker run -d --name lab4-jm-sysadm:$GITHUB_RUN_NUMBER -p 3000:3000 jmsysadm/nodejs:$GITHUB_RUN_NUMBER
         
      
