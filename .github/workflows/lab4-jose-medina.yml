@@ -269,7 +269,7 @@ jobs:
       # Agregar lógica de evaluación si el docker name existe en sttatus Running
       - name: Stop and remove existing container
         run: |
-          $containerName: "lab4-jm-sysadm"
+          $containerName = "lab4-jm-sysadm"
           $containerStatus = docker ps --filter "name=$containerName" --format "{{.Names}}"
 
           if ($containerStatus -eq $containerName) {
