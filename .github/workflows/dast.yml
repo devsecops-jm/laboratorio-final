@@ -48,7 +48,7 @@ jobs:
   Zap_Scan:
       name: Scan ZAP website
       needs: Deploy
-      runs-on: self-hosted
+      runs-on: ubuntu-latest, self-hosted
       steps:
         - name: ZAP Scan
           uses: zaproxy/action-full-scan@v0.12.0
