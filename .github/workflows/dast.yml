@@ -64,4 +64,4 @@ jobs:
       - name: Run ZAP SCAN container
         run: |
           Write-Output "Ejecutando ZAP Scan..."
-          docker run -t ghcr.io/zaproxy/zaproxy:stable zap-full-scan.py -t http://localhost:3000/'
+          docker run -t ghcr.io/zaproxy/zaproxy:stable zap-full-scan.py -t http://localhost:3000/
