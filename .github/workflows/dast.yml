@@ -7,12 +7,53 @@ on:
       #- '**'
 jobs:
 
-    Zap_Scan:
-        name: Scan ZAP website
-        #needs: Deploy
-        runs-on: ubuntu-latest
-        steps:
-          - name: ZAP Scan
-            uses: zaproxy/action-full-scan@v0.12.0
-            with:
-                target: 'http://localhost:3000/' # 'https://www.zaproxy.org/'
+  Deploy:
+    name: Deploy Docker Image
+    #needs: DockerScan
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Docker Login
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      
+      - name: Pull Docker
+        run: |
+          docker pull jmsysadm/nodejs
+      
+      - name: Stop and remove existing container
+        run: |
+          $containerName = "lab4-jm-sysadm"
+          $containerStatus = docker ps --filter "name=$containerName" --format "{{.Names}}"
+
+          if ($containerStatus -eq $containerName) {
+              Write-Output "Container $containerName identificado, deteniendo servicios"
+              docker stop $containerName
+              docker rm $containerName
+          } else {
+              Write-Output "Container $containerName no existe"
+          }
+
+      - name: Run Docker container
+        run: |
+          Write-Output "Desplegando container actualizado"
+          docker run -d --name lab4-jm-sysadm -p 3000:3000 jmsysadm/nodejs
+
+  Zap_Scan:
+      name: Scan ZAP website
+      needs: Deploy
+      runs-on: self-hosted
+      steps:
+        - name: ZAP Scan
+          uses: zaproxy/action-full-scan@v0.12.0
+          with:
+              target: 'http://localhost:3000/' # 'https://www.zaproxy.org/'
+
+
+

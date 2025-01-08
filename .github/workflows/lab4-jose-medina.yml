@@ -284,4 +284,5 @@ jobs:
         run: |
           Write-Output "Desplegando container actualizado"
           docker run -d --name lab4-jm-sysadm -p 3000:3000 jmsysadm/nodejs
-      
+
+
