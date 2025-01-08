@@ -308,7 +308,7 @@ jobs:
     - name: Run ZAP SCAN container
       run: |
         $containerName = "zaproxy"
-        $containerStatus = docker ps --filter "name=$containerName" --format "{{.Names}}"
+        $containerStatus = docker ps -a --filter "name=$containerName" --format "{{.Names}}"
 
         if ($containerStatus -eq $containerName) {
             Write-Output "Container $containerName identificado, deteniendo servicios"
