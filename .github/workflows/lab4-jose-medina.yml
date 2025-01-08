@@ -3,7 +3,7 @@ name: LAB4-DevSecOps-JM
 on:
   push:
     branches:
-      - fearute-jm-sysadm # main
+      - feature-jm-sysadm # main
       #- '**'
 jobs:
 
