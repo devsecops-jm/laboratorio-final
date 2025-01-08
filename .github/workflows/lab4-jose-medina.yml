@@ -3,7 +3,7 @@ name: LAB4-DevSecOps-JM
 on:
   push:
     branches:
-      - main
+      - fearute-jm-sysadm # main
       #- '**'
 jobs:
 
@@ -146,7 +146,7 @@ jobs:
           project: '${{ github.event.repository.name }}'
           path: '.'
           format: 'HTML'
-          out: '.' 
+          out: 'dependency-check-report.html' 
           args: > # --failOnCVSS 4
             --enableRetired
             
@@ -154,7 +154,7 @@ jobs:
         uses: actions/upload-artifact@master
         with:
            name: Depcheck report
-           path: ${{github.workspace}}/reports    
+           path: ${{github.workspace}}/dependency-check-report.html
   
 #----------------------------------------------->
 # CONTAINER BUILD AND PUSH DOCKER HUB
@@ -162,7 +162,7 @@ jobs:
 
   DockerBuild:
     needs: SCA
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
 
     - name: Checkout code
