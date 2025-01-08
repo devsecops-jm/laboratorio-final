@@ -50,41 +50,18 @@ jobs:
       needs: Deploy
       runs-on: self-hosted
       steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Docker Login
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      
+
       - name: Pull Docker OWASP ZAP
         run: |
           docker pull zaproxy/zap-stable
-      
-      - name: Stop and remove existing container
+
+      - name: Run ZAP SCAN container
         run: |
-          $containerName = "zaproxy"
-          $containerStatus = docker ps --filter "name=$containerName" --format "{{.Names}}"
-
-          if ($containerStatus -eq $containerName) {
-              Write-Output "Container $containerName identificado, deteniendo servicios"
-              docker stop $containerName
-              docker rm $containerName
-          } else {
-              Write-Output "Container $containerName no existe"
-          }
-
-      - name: Run Docker container
-        run: |
-          Write-Output "Desplegando container actualizado"
-          docker run -d --name zaproxy zaproxy/zap-stable
-
-      - name: ZAP Scan
-        uses: zaproxy/action-full-scan@v0.12.0
-        with:
-            docker_name: zaproxy
-            target: 'http://localhost:3000/' # 'https://www.zaproxy.org/'
+          Write-Output "Ejecutando ZAP Scan..."
+          docker run -t ghcr.io/zaproxy/zaproxy:stable zap-full-scan.py -t http://localhost:3000/'
