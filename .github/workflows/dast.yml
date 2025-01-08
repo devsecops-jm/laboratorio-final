@@ -64,5 +64,5 @@ jobs:
       - name: Run ZAP SCAN container
         run: |
           Write-Output "Ejecutando ZAP Scan..."
-          docker run -v ${PWD}:/zap/wrk/:rw --network="host" zaproxy/zap-stable zap-baseline.py -t https://localhost:3000
+          docker run -v ${PWD}:/zap/wrk/:rw --network="host" zaproxy/zap-stable zap-baseline.py -t http://localhost:3000
           #docker run -t ghcr.io/zaproxy/zaproxy:stable zap-full-scan.py -t http://127.0.0.1:3000
