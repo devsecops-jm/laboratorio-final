@@ -53,6 +53,7 @@ jobs:
         - name: ZAP Scan
           uses: zaproxy/action-full-scan@v0.12.0
           with:
+              docker_name: ghcr.io/jmsysadm/nodejs
               target: 'http://localhost:3000/' # 'https://www.zaproxy.org/'
 
 
