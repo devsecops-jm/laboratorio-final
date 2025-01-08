@@ -60,7 +60,6 @@ jobs:
       - name: Pull Docker OWASP ZAP
         run: |
           docker pull zaproxy/zap-stable
-          docker pull owasp/zap2docker-stable
 
       - name: Run ZAP SCAN container
         run: |
