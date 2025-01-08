@@ -289,7 +289,7 @@ jobs:
 # ZAP SCAN
 #----------------------------------------------->
 
-  Zap_Scan:
+  DAST_Zap_Scan:
     name: Scan ZAP website
     needs: Deploy
     runs-on: self-hosted
