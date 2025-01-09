@@ -146,7 +146,7 @@ jobs:
           project: '${{ github.event.repository.name }}'
           path: '.'
           format: 'HTML'
-          out: '.' 
+          out: 'dependency-check-report.html' 
           args: > # --failOnCVSS 4
             --enableRetired
             
@@ -154,7 +154,7 @@ jobs:
         uses: actions/upload-artifact@master
         with:
            name: Depcheck report
-           path: ${{github.workspace}}/reports    
+           path: ${{github.workspace}}/dependency-check-report.html
   
 #----------------------------------------------->
 # CONTAINER BUILD AND PUSH DOCKER HUB
@@ -270,7 +270,7 @@ jobs:
       - name: Stop and remove existing container
         run: |
           $containerName = "lab4-jm-sysadm"
-          $containerStatus = docker ps --filter "name=$containerName" --format "{{.Names}}"
+          $containerStatus = docker ps -a  --filter "name=$containerName" --format "{{.Names}}"
 
           if ($containerStatus -eq $containerName) {
               Write-Output "Container $containerName identificado, deteniendo servicios"
